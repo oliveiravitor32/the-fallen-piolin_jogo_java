@@ -13,15 +13,11 @@ import javafx.geometry.Point2D;
 import javafx.scene.control.Button;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.layout.Background;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
-import javafx.scene.text.Text;
 import javafx.util.Duration;
 import org.example.utilitarios.FimDeJogo;
 
-import java.util.Timer;
-import java.util.TimerTask;
 
 import static com.almasb.fxgl.dsl.FXGL.getAppWidth;
 import static com.almasb.fxgl.dsl.FXGL.getGameScene;
@@ -33,7 +29,6 @@ import static com.almasb.fxgl.dsl.FXGLForKtKt.*;
  */
 
 public class PlayerComponent extends Component {
-    int x = 0;
 
     // Injetando o componente de física para ser utilizado dentro da classe
     private PhysicsComponent physics;
@@ -49,7 +44,7 @@ public class PlayerComponent extends Component {
     private boolean shootInCooldown = false;
 
     //Definindo limite de pulos do jogador
-    private int jumps = 4000;
+    private int jumps = 2;
 
     //Barra visual de vida
     private Rectangle barra_de_vida = new Rectangle(100, 30, Color.GREEN);
@@ -159,7 +154,6 @@ public class PlayerComponent extends Component {
         if (jumps == 0)
             return;
 
-
         physics.setVelocityY(-400);
 
         jumps--;
@@ -174,47 +168,20 @@ public class PlayerComponent extends Component {
 
             shootInCooldown = true;
 
-            Timer timer = new Timer();
-            long delay = 600;
-            TimerTask task = new TimerTask() {
-                @Override
-                public void run() {
-                    shootInCooldown = false;
-                }
-            };
-            timer.schedule(task, delay);
+            FXGL.getGameTimer().runOnceAfter(() -> shootInCooldown = false, Duration.millis(600));
         }
-
-
-
-
     }
 
     public void dispararAgua() {
 
         if(!shootInCooldown) {
             spawn("disparo_de_agua");
+            FXGL.play("water.wav");
+
             shootInCooldown = true;
 
-            Timer timer = new Timer();
-            long delay = 400;
-            TimerTask task = new TimerTask() {
-                @Override
-                public void run() {
-                    shootInCooldown = false;
-                }
-            };
-            timer.schedule(task, delay);
+            FXGL.getGameTimer().runOnceAfter(() -> shootInCooldown = false, Duration.millis(600));
         }
-        if (x == 4) {
-            FXGL.play("water.wav");
-        }
-
-        else if (x == 7) {
-            FXGL.play("water.wav");
-            x = 0;
-        }
-        x++;
     }
 
     public void tomaDano() {

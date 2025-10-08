@@ -5,6 +5,7 @@ import com.almasb.fxgl.app.GameSettings;
 
 import com.almasb.fxgl.app.ApplicationMode;
 import com.almasb.fxgl.app.scene.*;
+import com.almasb.fxgl.audio.Sound;
 import com.almasb.fxgl.core.math.FXGLMath;
 import com.almasb.fxgl.dsl.FXGL;
 import com.almasb.fxgl.entity.Entity;
@@ -13,11 +14,13 @@ import com.almasb.fxgl.input.virtual.VirtualButton;
 import com.almasb.fxgl.particle.ParticleEmitters;
 import com.almasb.fxgl.physics.PhysicsComponent;
 import com.almasb.fxgl.physics.box2d.dynamics.Body;
+import com.almasb.fxgl.ui.FontType;
 import javafx.geometry.Point2D;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.MouseButton;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
+import javafx.scene.text.Text;
 import javafx.util.Duration;
 
 import java.util.Optional;
@@ -38,15 +41,27 @@ import static com.almasb.fxgl.dsl.FXGLForKtKt.spawn;
 
 public class Main extends GameApplication {
 
-// Injetando a classe player de forma global
-    private Entity player;
-    private Entity enemy;
+    // Injetando a classe player de forma global
+    private Entity player = new Entity();
+    private Entity enemy = new Entity();
 
+    // Libera a entrada de dados
+    private boolean aceitaEntradaDeDados = false;
+
+
+    public void setAceitaEntradaDeDados(boolean aceitaEntradaDeDados) {
+        this.aceitaEntradaDeDados = aceitaEntradaDeDados;
+    }
 
 // método de configurações usado para
 // definir o tamanho da tela entre outros.
     @Override
     protected void initSettings(GameSettings settings){
+        // Versão atual do jogo
+        settings.setVersion("1.0.0");
+
+        // Nome do jogo
+        settings.setTitle("The Fallen Piolin");
 
         // Configura tamanho da tela
         settings.setWidth(15*70); // 1050
@@ -74,7 +89,7 @@ public class Main extends GameApplication {
         });
 
         // Modo da aplicação (Desenvolvimento, Debug ou final) apenas algo visual
-        settings.setApplicationMode(ApplicationMode.DEVELOPER);
+        settings.setApplicationMode(ApplicationMode.RELEASE);
 
         // Settings.getCollisionDetectionStrategy();
         // Settings.getEnabledMenuItems();
@@ -91,11 +106,15 @@ public class Main extends GameApplication {
         getInput().addAction(new UserAction("Left") {
             @Override
             protected void onAction() {
+                if(!aceitaEntradaDeDados) {return;}
+
                 player.getComponent(PlayerComponent.class).left();
             }
 
             @Override
             protected void onActionEnd() {
+                if(!aceitaEntradaDeDados) {return;}
+
                 player.getComponent(PlayerComponent.class).stop();
             }
         },
@@ -106,11 +125,15 @@ public class Main extends GameApplication {
         getInput().addAction(new UserAction("Right") {
             @Override
             protected void onAction() {
+                if(!aceitaEntradaDeDados) {return;}
+
                 player.getComponent(PlayerComponent.class).right();
             }
 
             @Override
             protected void onActionEnd() {
+                if(!aceitaEntradaDeDados) {return;}
+
                 player.getComponent(PlayerComponent.class).stop();
             }
         },
@@ -121,6 +144,8 @@ public class Main extends GameApplication {
         getInput().addAction(new UserAction("Jump") {
             @Override
             protected void onActionBegin() {
+                if(!aceitaEntradaDeDados) {return;}
+
                 player.getComponent(PlayerComponent.class).jump();
             }
         },
@@ -131,6 +156,8 @@ public class Main extends GameApplication {
         getInput().addAction(new UserAction("Disparar pena") {
             @Override
             protected void onActionBegin() {
+                if(!aceitaEntradaDeDados) {return;}
+
                 player.getComponent(PlayerComponent.class).shoot();
             }
         },
@@ -140,6 +167,8 @@ public class Main extends GameApplication {
         getInput().addAction(new UserAction("Disparar água") {
             @Override
             protected void onActionBegin() {
+                if(!aceitaEntradaDeDados) {return;}
+
                 player.getComponent(PlayerComponent.class).dispararAgua();
             }
         },
@@ -149,9 +178,8 @@ public class Main extends GameApplication {
         getInput().addAction(new UserAction("PAUSE") {
             @Override
             protected void onActionBegin() {
-
-               // FXGL.play("2024-05-01_19-17-10_online-audio-converter.com.wav");
                 getGameController().pauseEngine();
+                getGameController().gotoGameMenu();
             }
         },
         KeyCode.F);
@@ -170,6 +198,8 @@ public class Main extends GameApplication {
         getInput().addAction(new UserAction("Move espalha lixo para a esquerda!") {
             @Override
             protected void onActionBegin() {
+                if(!aceitaEntradaDeDados) {return;}
+
                 enemy.getComponent(EnemyComponent.class).moveParaEsquerda();
             }
         },
@@ -179,16 +209,20 @@ public class Main extends GameApplication {
         getInput().addAction(new UserAction("Move espalha lixo para a direita!") {
             @Override
             protected void onActionBegin() {
+                if(!aceitaEntradaDeDados) {return;}
+
                 enemy.getComponent(EnemyComponent.class).moveParaDireita();
             }
         },
-        KeyCode.K);
+        KeyCode.L);
 
 
         getInput().addAction(new UserAction("Disparar com Espalha Lixo"){
 
             @Override
             protected void onActionBegin() {
+                if(!aceitaEntradaDeDados) {return;}
+
                 Entity enemy = getGameWorld().getSingleton(EntityType.ENEMY);
 
                 Optional<Entity> entidadeMaisProxima = getGameWorld().getClosestEntity(enemy, (e) -> {
@@ -198,7 +232,7 @@ public class Main extends GameApplication {
                 enemy.getComponent(EnemyComponent.class).atirar(entidadeMaisProxima.get());
             }
         },
-        KeyCode.L);
+        KeyCode.I);
     }
 
 
@@ -207,11 +241,17 @@ public class Main extends GameApplication {
 */
     @Override
     protected void onPreInit() {
-        // Modificando volume inicial
+        // Modifica volume inicial
         getSettings().setGlobalMusicVolume(0.20);
 
-        // Definindo som de fundo
+        // Define som de fundo
         loopBGM("backsound.wav");
+    }
+
+    @Override
+    protected void onUpdate(double tpf) {
+        tpf = Math.min(tpf, 0.06); // limit tpf to max 60ms
+        super.onUpdate(tpf);
     }
 
     /*
@@ -220,7 +260,6 @@ public class Main extends GameApplication {
     */
     @Override
     protected void initGame(){
-
         FXGL.play("detenha.wav");
 
         /*
@@ -236,10 +275,56 @@ public class Main extends GameApplication {
         // Definindo o mapa
         setLevelFromMap("tmx/map-remastered8.tmx");
 
+        // Define posição de início da câmera
+        Viewport viewport = getGameScene().getViewport();
+        viewport.setX(0);
+        viewport.setY(490);
+        viewport.setBounds(-1500, -200, 2560, 1200);
+        viewport.setZoom(2.5);
 
+        // Contagem regressiva para dar inicio ao jogo
+        contagemRegressiva(3);
+    }
+
+    private void contagemRegressiva(int segundos) {
+
+        Viewport viewport = getGameScene().getViewport();
+        viewport.setBounds(-1500, -200, 2560, 1200);
+
+        Text textoDeContagemRegressiva = FXGL.getUIFactoryService()
+                .newText("", Color.BLACK, FontType.GAME, 100);
+
+        textoDeContagemRegressiva.setTranslateX(getAppWidth() / 2 - 50);
+        textoDeContagemRegressiva.setTranslateY(getAppHeight() / 2 - 50);
+        textoDeContagemRegressiva.setMouseTransparent(true);
+        getGameScene().addUINode(textoDeContagemRegressiva);
+
+        for (int i = 0; i <= segundos; i++) {
+            final int count = segundos - i;
+
+            runOnce(() -> {
+                if (count > 0) {
+                    textoDeContagemRegressiva.setText(String.valueOf(count));
+                } else {
+                    textoDeContagemRegressiva.setText("Vai!");
+                    textoDeContagemRegressiva.setFill(Color.GREEN);
+                }
+            }, Duration.seconds(i));
+        }
+
+        // Remove texto e invoca personagens após a contagem regressivar terminar
+        runOnce(() -> {
+            getGameScene().removeUINode(textoDeContagemRegressiva);
+            invocaPersonagens();
+            // Libera entrada de dados novamente
+            aceitaEntradaDeDados = true;
+        }, Duration.seconds(segundos + 1));
+    }
+
+    private void invocaPersonagens() {
         // PIOLIN
-        player = spawn("player", 0, 600);
-        // Ajustar o amortecimento linear do corpo físico para evitar o quique
+        player = spawn("player", 0, 620);
+        // Ajustar o amortecimento linear do corpo físico para evitar que o personagem quique ao bater no chão
         // deixa o personagem planando quando pula
         Body bodyPiolin = player.getComponent(PhysicsComponent.class).getBody();
         bodyPiolin.setLinearDamping(10.0f);
@@ -256,7 +341,6 @@ public class Main extends GameApplication {
         viewport.bindToEntity(player, getAppWidth() / 2, 450);
         viewport.setZoom(2.5);
         viewport.setLazy(true);
-
     }
 
 

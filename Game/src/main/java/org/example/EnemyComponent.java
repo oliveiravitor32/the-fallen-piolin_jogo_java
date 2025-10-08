@@ -1,5 +1,6 @@
 package org.example;
 
+import com.almasb.fxgl.audio.Sound;
 import com.almasb.fxgl.dsl.FXGL;
 import com.almasb.fxgl.dsl.components.OffscreenCleanComponent;
 import com.almasb.fxgl.dsl.components.ProjectileComponent;
@@ -9,6 +10,7 @@ import com.almasb.fxgl.physics.PhysicsComponent;
 import com.almasb.fxgl.texture.AnimatedTexture;
 import com.almasb.fxgl.texture.AnimationChannel;
 
+import com.almasb.fxgl.time.TimerAction;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Point2D;
 import javafx.scene.image.Image;
@@ -33,9 +35,6 @@ import static org.example.EntityType.DISPARO_INIMIGO;
 
 public class EnemyComponent extends Component {
 
-    // Atributos
-    int x = 0;
-
     private PhysicsComponent physics;
 
     //Injetando componentes para gerar animação ao visual (sprite) do jogador
@@ -54,7 +53,7 @@ public class EnemyComponent extends Component {
     private int velocidadeDoPersonagem = 180;
 
     private boolean tiroEmEspera = false;
-    private Timer tarefaDeMovimentacaoAleatoria;
+    private TimerAction tarefaDeMovimentacaoAleatoria;
 
     public EnemyComponent() {
 
@@ -68,7 +67,7 @@ public class EnemyComponent extends Component {
         animWalk = new AnimationChannel(image, 6, 64, 64, Duration.seconds(1), 4, 5);
 
         // Definindo animação para inimigo atirando
-        animTiro = new AnimationChannel(image, 6, 64, 64, Duration.seconds(1.25), 2, 3);
+        animTiro = new AnimationChannel(image, 6, 64, 64, Duration.seconds(0.16), 2, 3);
 
 
         // Colocando a primeira textura do jogodor ao ser invocado
@@ -97,13 +96,7 @@ public class EnemyComponent extends Component {
         getGameScene().addUINode(barra_de_vida);
 
         // Definindo movimentação aleatória
-        tarefaDeMovimentacaoAleatoria = new Timer();
-        tarefaDeMovimentacaoAleatoria.scheduleAtFixedRate(new TimerTask() {
-            @Override
-            public void run() {
-                movimentacaoAleatoria();
-            }
-        }, 1000, 1000000000);
+        tarefaDeMovimentacaoAleatoria = FXGL.run(this::movimentacaoAleatoria, Duration.seconds(1));
     }
 
     @Override
@@ -114,6 +107,14 @@ public class EnemyComponent extends Component {
         // Escala do personagem
         entity.setScaleX(escalaDoPersonagem);
         entity.setScaleY(escalaDoPersonagem);
+    }
+
+    @Override
+    public void onRemoved() {
+        // Stop the loop when entity is removed from the world
+        if (tarefaDeMovimentacaoAleatoria != null) {
+            tarefaDeMovimentacaoAleatoria.expire();
+        }
     }
 
     @Override
@@ -132,20 +133,29 @@ public class EnemyComponent extends Component {
         life--;
         barra_de_vida.setWidth(barra_de_vida.getWidth()-3.33);
         if (life <= 0 ) {
-            tarefaDeMovimentacaoAleatoria.cancel();
+            //tarefaDeMovimentacaoAleatoria.cancel();
             entity.removeFromWorld();
             FimDeJogo.terminarWinner();
         }
 
         if (life == 4 || life == 15 || life == 22) {
-            FXGL.play("haha.wav");
+            Sound som_haha = FXGL.getAssetLoader().loadSound("haha.wav");
+            som_haha.getAudio().setVolume(0.5);
+            som_haha.getAudio().play();
+            //FXGL.play("haha.wav");
+        }
+        else if (life == 8 || life == 18 || life == 28){
+            Sound som_vai_queimar= FXGL.getAssetLoader().loadSound("vaiqueimar.wav");
+            som_vai_queimar.getAudio().setVolume(0.8);
+            som_vai_queimar.getAudio().play();
+            FXGL.play("vaiqueimar.wav");
         }
     }
 
     public void atirar(Entity entidadeParaAtirar) {
         if(!tiroEmEspera) {
             double direcaoDoProjetil = getEntity().getCenter().getX();;
-            double origemDoProjetilEixoY = getEntity().getCenter().getY() - 25;
+            double origemDoProjetilEixoY = getEntity().getCenter().getY() - 28;
             double origemDoProjetilEixoX = direcaoDoProjetil;
             double mudaEscalaDaImagemParaDirecaoDoProjetil = 1;
 
@@ -154,7 +164,7 @@ public class EnemyComponent extends Component {
                 origemDoProjetilEixoX -= 40;
                 direcaoDoProjetil = -direcaoDoProjetil;
 
-                mudaEscalaDaImagemParaDirecaoDoProjetil = -1;
+                mudaEscalaDaImagemParaDirecaoDoProjetil = -0.8;
                 getEntity().getComponent(EnemyComponent.class).moveParaEsquerda();
             } else {
                 getEntity().getComponent(EnemyComponent.class).moveParaDireita();
@@ -165,6 +175,21 @@ public class EnemyComponent extends Component {
 
             AnimatedTexture visualAnimadoTiro = new AnimatedTexture(animacaoTiro);
 
+
+            Sound som_bazuca = FXGL.getAssetLoader().loadSound("fire_launcher.wav");
+            som_bazuca.getAudio().setVolume(0.5);
+            som_bazuca.getAudio().play();
+            //FXGL.play("fire_launcher.wav");
+
+
+            if (life == 28 || life == 15 || life == 12 || life == 10 || life == 5 || life == 1) {
+                Sound som_grito_fogo = FXGL.getAssetLoader().loadSound("fogo.wav");
+                som_grito_fogo.getAudio().setVolume(0.5);
+                som_grito_fogo.getAudio().play();
+                //FXGL.play("fogo.wav");
+            }
+
+
             Point2D direction = new Point2D(direcaoDoProjetil, 0);
 
             entityBuilder()
@@ -172,45 +197,21 @@ public class EnemyComponent extends Component {
                     .type(DISPARO_INIMIGO)
                     .viewWithBBox(visualAnimadoTiro)
                     .collidable()
-                    .with(new ProjectileComponent(direction, 500))
+                    .with(new ProjectileComponent(direction, 300))
                     .with(new OffscreenCleanComponent())
-                    .scale(1, mudaEscalaDaImagemParaDirecaoDoProjetil)
+                    .scale(0.8, mudaEscalaDaImagemParaDirecaoDoProjetil)
                     .buildAndAttach();
 
-            texture.loopAnimationChannel(animTiro);
 
+            texture.playAnimationChannel(animTiro);
+
+            // Volta o loop em animação normal após animação de tiro
+            texture.setOnCycleFinished(() -> {texture.loopAnimationChannel(animIdle);});
+
+            // Tempo de espera entre tiros
             tiroEmEspera = true;
-
-            Timer timer = new Timer();
-            long delay = 600;
-
-            TimerTask task = new TimerTask() {
-                @Override
-                public void run() {
-                    tiroEmEspera = false;
-                }
-            };
-
-            timer.schedule(task, delay);
+            FXGL.getGameTimer().runOnceAfter(() -> tiroEmEspera = false, Duration.millis(600));
         }
-
-        if (x == 3 || x == 6){
-            FXGL.play("fogo.wav");
-        }
-
-        else if (x == 2 || x == 5){
-            FXGL.play("fire_launcher.wav");
-
-            if (x > 6){
-                x = 0;
-            }
-        }
-
-        else if (life == 8 || life == 18 || life == 28){
-            FXGL.play("vaiqueimar.wav");
-        }
-
-        x++;
     }
 
     public void moveParaEsquerda(){
@@ -230,18 +231,9 @@ public class EnemyComponent extends Component {
     public void pararPersonagem() {
         metodoPararFoiUtilizado = true;
 
-        Timer timer = new Timer();
-        long delay = 400;
-        TimerTask task = new TimerTask(){
-
-            @Override
-            public void run() {
-                metodoPararFoiUtilizado = false;
-            }
-        };
-
-        timer.schedule(task, delay);
         physics.setVelocityX(0);
+
+        FXGL.getGameTimer().runOnceAfter(() -> metodoPararFoiUtilizado = false, Duration.millis(400));
     }
 
     public void movimentacaoAleatoria() {
@@ -253,13 +245,8 @@ public class EnemyComponent extends Component {
         if (decisaoAleatoriaDeMovimentacao == 0) {
             moveParaDireita();
         }
-
-        else if (decisaoAleatoriaDeMovimentacao == 1) {
-            moveParaEsquerda();
-        }
-
         else {
-            pararPersonagem();
+            moveParaEsquerda();
         }
     }
 }

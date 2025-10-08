@@ -9,6 +9,7 @@ import javafx.scene.layout.Background;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Text;
+import org.example.Main;
 
 import static com.almasb.fxgl.dsl.FXGL.getAppWidth;
 import static com.almasb.fxgl.dsl.FXGL.getGameScene;
@@ -19,13 +20,12 @@ public class FimDeJogo {
     // Perdemos
     public static void terminarLoser() {
         // Configurações:
-
         getGameController().pauseEngine();
         Rectangle barra_de_vida = new Rectangle(260, 50, Color.DARKORANGE);
         barra_de_vida.setX(getAppWidth()/2 - 130);
         barra_de_vida.setY(300);
 
-        Button btn = new Button("FECHAR");
+        Button btn = new Button("REINICIAR");
         btn.setTranslateX(getAppWidth()/2 - 125);
         btn.setTranslateY(300);
         btn.setBackground(Background.fill(Color.ORANGE));
@@ -35,7 +35,7 @@ public class FimDeJogo {
         EventHandler<ActionEvent> event = new EventHandler<ActionEvent>() {
             public void handle(ActionEvent e)
             {
-                FXGL.getGameController().exit();
+                reiniciar();
             }
         };
 
@@ -56,13 +56,12 @@ public class FimDeJogo {
     // Ganhamos
     public static void terminarWinner() {
         // Configurações:
-
         getGameController().pauseEngine();
         Rectangle barra_de_vida = new Rectangle(260, 50, Color.GRAY);
         barra_de_vida.setX(getAppWidth()/2 - 130);
         barra_de_vida.setY(300);
 
-        Button btn = new Button("FECHAR");
+        Button btn = new Button("REINICIAR");
         btn.setTranslateX(getAppWidth()/2 - 125);
         btn.setTranslateY(300);
         btn.setBackground(Background.fill(Color.WHITE));
@@ -72,7 +71,7 @@ public class FimDeJogo {
         EventHandler<ActionEvent> event = new EventHandler<ActionEvent>() {
             public void handle(ActionEvent e)
             {
-                FXGL.getGameController().exit();
+                reiniciar();
             }
         };
 
@@ -87,5 +86,13 @@ public class FimDeJogo {
         getGameScene().addUINode(barra_de_vida);
         getGameScene().addUINode(btn);
         getGameScene().addUINode(textOptions);
+    }
+
+
+    public static void reiniciar() {
+        Main app = FXGL.getAppCast();
+        app.setAceitaEntradaDeDados(false);
+        FXGL.getGameController().startNewGame();
+        FXGL.getGameController().resumeEngine();
     }
 }

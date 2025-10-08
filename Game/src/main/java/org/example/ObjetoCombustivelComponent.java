@@ -22,7 +22,10 @@ public class ObjetoCombustivelComponent extends Component {
     }
 
     public void recuperarVida() {
-        florestaComponente.recuperar_vida_da_floresta();
-        getEntity().getComponent(ParticleComponent.class).getEmitter().setNumParticles(0);
+        // Recupera vida somente se o objeto combustível acertado estiver danificado.
+        if (getEntity().getComponent(ParticleComponent.class).getEmitter().getNumParticles() > 0) {
+            florestaComponente.recuperar_vida_da_floresta();
+            getEntity().getComponent(ParticleComponent.class).getEmitter().setNumParticles(0);
+        }
     }
 }

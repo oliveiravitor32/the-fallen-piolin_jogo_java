@@ -143,20 +143,6 @@ public class MainFactory implements EntityFactory {
                 .build();
     }
 
-
-    // Invocar moeda
-    // MÉTODO QUE TAMBÉM SERÁ REMOVIDO NO FUTURO QUANDO NÃO HOUVER NECESSIDADE DE UTILIZAÇÃO DO PRIMEIRO MAPA
-    @Spawns("coin")
-    public Entity newCoin(SpawnData data) {
-        return entityBuilder()
-                .type(COIN)
-                .zIndex(2)
-                .viewWithBBox(new Circle(160/ 2 , Color.GOLD))
-                .with( new PhysicsComponent())
-                .build();
-    }
-
-
     @Spawns("barra_de_vida_objeto_combustivel")
     public Entity newBarraDeVidaObjetosCombustiveis(SpawnData data) {
 
@@ -175,7 +161,6 @@ public class MainFactory implements EntityFactory {
         da pena, velocidade, onde ela aparecerá e remove a mesma quando
         sair da tela do jogador (campo de visão)
         */
-
     @Spawns("feather")
     public Entity newFeather(SpawnData data){
 
@@ -186,7 +171,7 @@ public class MainFactory implements EntityFactory {
         // LINHAS QUE DEVEM SER TRADUZIDOS POSTERIOMENTE PARA MELHOR ENTENDIMENTO KKKKKKKK
         // PS: Foi mal geuntiiiii!
         double direcaoDoProjetil = player.getCenter().getX();
-        double origemDoProjetilEixoY = player.getCenter().getY() - 35;
+        double origemDoProjetilEixoY = player.getCenter().getY() - 39;
         double origemDoProjetilEixoX = direcaoDoProjetil - 40;
         double mudaEscalaDaImagemParaDirecaoDoProjetil = 0.4;
 
@@ -200,15 +185,24 @@ public class MainFactory implements EntityFactory {
         // Direção do projetil
         Point2D direction = new Point2D(direcaoDoProjetil, 0);
 
-        return  entityBuilder()
+        Entity pena =  entityBuilder()
                 .at(origemDoProjetilEixoX, origemDoProjetilEixoY)
                 .type(DISPARO_DE_PENA_JOGADOR)
                 .viewWithBBox("normal_feather.png")
                 .collidable()
-                .with(new ProjectileComponent(direction, 1000))
+                .with(new ProjectileComponent(direction, 200))
                 .with(new OffscreenCleanComponent())
                 .scale(0.4, mudaEscalaDaImagemParaDirecaoDoProjetil)
                 .build();
+
+        // Remove pena depois de 1.2 segundos
+        FXGL.getGameTimer().runOnceAfter(() -> {
+            if (pena.isActive()) {
+                pena.removeFromWorld();
+            }
+        }, Duration.seconds(1.2));
+
+        return pena;
     }
 
     @Spawns("tiroDoEspalhaLixo")
@@ -221,15 +215,15 @@ public class MainFactory implements EntityFactory {
 
         double direcaoDoProjetil = espalhaLixo.getCenter().getX();
         double origemDoProjetilEixoY = espalhaLixo.getCenter().getY() - 35;
-        double origemDoProjetilEixoX = direcaoDoProjetil;
-        double mudaEscalaDaImagemParaDirecaoDoProjetil = 0.5;
+        double origemDoProjetilEixoX = direcaoDoProjetil - 10;
+        double mudaEscalaDaImagemParaDirecaoDoProjetil = 0.3;
 
 
         // Regra para disparo para a esquerda
         if (espalhaLixo.getPosition().getX() > playerPosicaoX) {
             direcaoDoProjetil = -espalhaLixo.getCenter().getX();
-            origemDoProjetilEixoX -= 80;
-            mudaEscalaDaImagemParaDirecaoDoProjetil = -0.5;
+            origemDoProjetilEixoX -= 70;
+            mudaEscalaDaImagemParaDirecaoDoProjetil = -0.3;
             espalhaLixo.getComponent(EnemyComponent.class).moveParaEsquerda();
         }
         else {
@@ -241,7 +235,7 @@ public class MainFactory implements EntityFactory {
         // Direção do projetil
         Point2D direction = new Point2D(direcaoDoProjetil, 0);
 
-        return  entityBuilder()
+        Entity disparoDeFogo = entityBuilder()
                 .at(origemDoProjetilEixoX, origemDoProjetilEixoY)
                 .type(DISPARO_INIMIGO)
                 .viewWithBBox("normal_feather.png")
@@ -250,6 +244,15 @@ public class MainFactory implements EntityFactory {
                 .with(new OffscreenCleanComponent())
                 .scale(0.5, mudaEscalaDaImagemParaDirecaoDoProjetil)
                 .build();
+
+        // Remove disparo de fogo depois de 1.2 segundos
+        FXGL.getGameTimer().runOnceAfter(() -> {
+            if (disparoDeFogo.isActive()) {
+                disparoDeFogo.removeFromWorld();
+            }
+        }, Duration.seconds(1.2));
+
+        return disparoDeFogo;
     }
 
 
@@ -261,29 +264,38 @@ public class MainFactory implements EntityFactory {
         Entity player = getGameWorld().getSingleton(EntityType.JOGADOR);
 
         double direcaoDoProjetil = player.getCenter().getX();
-        double origemDoProjetilEixoY = player.getCenter().getY() - 80;
-        double origemDoProjetilEixoX = direcaoDoProjetil - 160;
-        double mudaEscalaDaImagemParaDirecaoDoProjetil = 0.1;
+        double origemDoProjetilEixoY = player.getCenter().getY() - 90;
+        double origemDoProjetilEixoX = direcaoDoProjetil - 140;
+        double mudaEscalaDaImagemParaDirecaoDoProjetil = 0.05;
 
         // Regra para disparo para a esquerda
         if (player.getScaleX() < 0) {
-            origemDoProjetilEixoX = direcaoDoProjetil - 160;
+            origemDoProjetilEixoX = direcaoDoProjetil - 188;
             direcaoDoProjetil = -player.getCenter().getX();
-            mudaEscalaDaImagemParaDirecaoDoProjetil = -0.1;
+            mudaEscalaDaImagemParaDirecaoDoProjetil = -0.05;
         }
 
         // Direção do projetil
         Point2D direction = new Point2D(direcaoDoProjetil, 0);
 
-        return  entityBuilder()
+        Entity disparoDeAgua = entityBuilder()
                 .at(origemDoProjetilEixoX, origemDoProjetilEixoY)
                 .type(DISPARO_DE_AGUA_JOGADOR)
                 .viewWithBBox("waterD.png")
                 .collidable()
-                .with(new ProjectileComponent(direction, 1000))
+                .with(new ProjectileComponent(direction, 200))
                 .with(new OffscreenCleanComponent())
                 .scale(0.1, mudaEscalaDaImagemParaDirecaoDoProjetil)
                 .build();
+
+        // Remove disparo de água depois de 1.2 segundos
+        FXGL.getGameTimer().runOnceAfter(() -> {
+            if (disparoDeAgua.isActive()) {
+                disparoDeAgua.removeFromWorld();
+            }
+        }, Duration.seconds(1.2));
+
+        return disparoDeAgua;
     }
 
 
@@ -355,7 +367,7 @@ public class MainFactory implements EntityFactory {
                 // Componente possivel de colisão
                 .with(new CollidableComponent(true))
 
-                //Sensor para verificar proximidade do PIOLIN
+                // Sensor para verificar proximidade de alvos
                 .with(new SensorComponent())
                 .with(new EnemyComponent())
                 .build();
