@@ -70,6 +70,25 @@ A pena machuca o inimigo; a água apaga o fogo dos objetos combustíveis e devol
 vida à floresta. Há um tempo de espera de 600 ms entre disparos, compartilhado
 pelas duas armas.
 
+## O Espalha Lixo
+
+Ele tem uma intenção: **atear fogo**. Caminha até o objeto combustível mais próximo
+que ainda não está queimando, chega perto e o incendeia. Só larga esse plano quando o
+Piolin se aproxima, e por pouco tempo — depois volta a circular pelo mapa.
+
+| Estado | Quando | O que faz |
+|---|---|---|
+| `INCENDIANDO` | Padrão | Vai até o combustível apagado mais próximo e ateia fogo |
+| `DEFENDENDO` | Piolin por perto | Mantém distância dele e atira, por no máximo 2,5s |
+| `CACANDO` | Nada apagado ao alcance | Persegue o Piolin |
+
+Abaixo de 1/3 de vida ele **se enfurece**: anda mais rápido, atira com menos espera e
+a animação de caminhada acelera, para a mudança ficar visível.
+
+O cérebro é `IaDoEspalhaLixo` e o corpo é `EnemyComponent` — um decide, o outro
+executa. As constantes de balanceamento estão no topo dessas duas classes: distância
+de ameaça, alcance de tiro, tempo de preparo e as esperas entre disparos.
+
 ## Controles
 
 | Tecla | Ação |
@@ -114,8 +133,8 @@ Game/
     MainLoadingScene.java           Tela de carregamento
     EntityType.java                 Tipos de entidade usados nas colisões
     PlayerComponent.java            Piolin: animação, movimento, disparos, vida
-    EnemyComponent.java             Espalha Lixo: movimento, disparo, vida
-    SensorComponent.java            Detecta o jogador e decide quando atacar
+    EnemyComponent.java             Espalha Lixo: corpo (visual, movimento, vida)
+    IaDoEspalhaLixo.java            Cerebro do inimigo: decide o que ele faz
     ObjetoCombustivelComponent.java Objetos que pegam fogo no mapa
     Floresta.java                   Vida coletiva da floresta
     ui/Hud.java                     Dono das barras de vida em tela

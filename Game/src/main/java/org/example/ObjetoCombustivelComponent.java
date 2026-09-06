@@ -23,9 +23,14 @@ public class ObjetoCombustivelComponent extends Component {
         getEmissorDeParticulas().setNumParticles(++contadorDeParticulas);
     }
 
+    /** Verdadeiro quando o objeto ja esta pegando fogo. Usado pela IA do inimigo. */
+    public boolean estaEmChamas() {
+        return getEmissorDeParticulas().getNumParticles() > 0;
+    }
+
     public void recuperarVida() {
         // Recupera vida somente se o objeto combustível acertado estiver em chamas.
-        if (getEmissorDeParticulas().getNumParticles() > 0) {
+        if (estaEmChamas()) {
             floresta.recuperarVida();
             getEmissorDeParticulas().setNumParticles(0);
             contadorDeParticulas = 0;

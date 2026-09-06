@@ -239,9 +239,10 @@ public class MainFactory implements EntityFactory {
                 .with(newCorpoDePersonagem())
                 .with(new CollidableComponent(true))
 
-                // Sensor para verificar proximidade de alvos
-                .with(new SensorComponent())
                 .with(new EnemyComponent(hud))
+
+                // O cerebro entra depois do corpo: ele da ordens ao EnemyComponent
+                .with(new IaDoEspalhaLixo())
                 .build();
     }
 
