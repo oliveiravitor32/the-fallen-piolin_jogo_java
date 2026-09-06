@@ -9,16 +9,23 @@ consome a vida da floresta.
 
 ## Tela de início
 
-Ao abrir, o jogo mostra um menu principal com a linguagem visual do iOS: a arte da
-floresta entra desfocada como papel de parede, o botão **Jogar** usa a cor de destaque
-e os demais são botões de material translúcido. **Controles** e **Créditos** abrem
-folhas que sobem pela base da tela (o "sheet" do iOS), fechadas pelo botão Concluído
-ou por um clique fora delas.
+Ao abrir, o jogo mostra um menu principal que junta duas referências: **a arrumação
+vem do iOS e a aparência vem do pixel art**.
 
-O visual fica todo em `ui/menu/EstiloIOS.java` — cores, cantos e a família tipográfica
+Do iOS vem só o arranjo dos elementos — uma coluna central de ações, cartões agrupados
+com o rótulo à esquerda e o valor à direita, folhas que sobem pela base da tela e muito
+respiro entre os itens. **Controles** e **Créditos** abrem essas folhas, fechadas pelo
+botão Concluído ou por um clique fora delas.
+
+Tudo o que é visual segue a arte do jogo: fonte pixelada, cantos quase retos, bordas
+grossas e sombras duras. O papel de parede é a própria arte da floresta reduzida a
+blocos (o desfoque seria o oposto de pixel art) e escurecida para os botões ficarem
+legíveis.
+
+O estilo fica todo em `ui/menu/EstiloDoMenu.java` — cores, cantos, espessuras e fontes
 estão centralizados ali, então dá para mudar a aparência do menu inteiro editando um
-arquivo só. Como a fonte San Francisco não existe fora dos aparelhos da Apple, a classe
-escolhe em tempo de execução a primeira família parecida que estiver instalada.
+arquivo só. O tamanho dos blocos do papel de parede é a constante `TAMANHO_DO_BLOCO`
+em `ui/menu/MenuPrincipal.java`.
 
 ## Como jogar
 
@@ -86,7 +93,7 @@ Game/
     ui/Hud.java                     Dono das barras de vida em tela
     ui/BarraDeVida.java             Barra: moldura + preenchimento
     ui/menu/MenuPrincipal.java      Tela de início (menu principal)
-    ui/menu/EstiloIOS.java          Cores, fontes e botões no estilo iOS
+    ui/menu/EstiloDoMenu.java       Cores, fontes e botões do menu
     ui/menu/PainelDeslizante.java   Folha inferior de Controles e Créditos
     utilitarios/Vida.java           Regra de vida pura (testável)
     utilitarios/FimDeJogo.java      Telas de vitória e derrota
@@ -114,4 +121,9 @@ o campo `type` para escolher o método `@Spawns` correspondente na `MainFactory`
 
 ## Licença
 
-Ver [LICENSE](LICENSE).
+O código é licenciado sob a MIT License — ver [LICENSE](LICENSE).
+
+A fonte do menu é a **Pixelify Sans**, © 2021 The Pixelify Sans Project Authors
+([repositório](https://github.com/eifetx/Pixelify-Sans)), distribuída sob a
+[SIL Open Font License 1.1](Game/src/main/resources/assets/ui/fonts/OFL.txt). O texto
+completo da licença acompanha os arquivos em `assets/ui/fonts/`.

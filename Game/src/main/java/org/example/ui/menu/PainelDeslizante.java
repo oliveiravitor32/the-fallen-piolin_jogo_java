@@ -72,13 +72,13 @@ public class PainelDeslizante extends StackPane {
             folha encosta na base da tela, so os cantos de cima ficam visiveis.
         */
         conteudo.setStyle(
-                "-fx-background-color: " + EstiloIOS.MATERIAL_ESCURO + ";"
-                        + "-fx-background-radius: " + EstiloIOS.RAIO_PAINEL + " "
-                        + EstiloIOS.RAIO_PAINEL + " 0 0;");
+                "-fx-background-color: " + EstiloDoMenu.MATERIAL_ESCURO + ";"
+                        + "-fx-background-radius: " + EstiloDoMenu.RAIO_PAINEL + " "
+                        + EstiloDoMenu.RAIO_PAINEL + " 0 0;");
 
-        conteudo.getChildren().add(new Group(EstiloIOS.alca()));
+        conteudo.getChildren().add(new Group(EstiloDoMenu.alca()));
 
-        VBox cabecalho = new VBox(EstiloIOS.texto(titulo, 22, true, EstiloIOS.TEXTO));
+        VBox cabecalho = new VBox(EstiloDoMenu.texto(titulo, 22, true, EstiloDoMenu.TEXTO));
         cabecalho.setAlignment(Pos.CENTER);
         cabecalho.setPadding(new Insets(16, 0, 14, 0));
         conteudo.getChildren().add(cabecalho);
@@ -86,13 +86,13 @@ public class PainelDeslizante extends StackPane {
         conteudo.getChildren().add(montarLista(itens));
 
         if (rodape != null && !rodape.isBlank()) {
-            VBox caixaDoRodape = new VBox(EstiloIOS.texto(rodape, 13, false, EstiloIOS.TEXTO_SECUNDARIO));
+            VBox caixaDoRodape = new VBox(EstiloDoMenu.texto(rodape, 13, false, EstiloDoMenu.TEXTO_SECUNDARIO));
             caixaDoRodape.setAlignment(Pos.CENTER);
             caixaDoRodape.setPadding(new Insets(14, 0, 0, 0));
             conteudo.getChildren().add(caixaDoRodape);
         }
 
-        VBox caixaDoBotao = new VBox(EstiloIOS.botao("Concluído", EstiloIOS.Tipo.VIDRO,
+        VBox caixaDoBotao = new VBox(EstiloDoMenu.botao("Concluído", EstiloDoMenu.Tipo.VIDRO,
                 LARGURA - MARGEM_INTERNA * 2, 46, this::fechar));
         caixaDoBotao.setAlignment(Pos.CENTER);
         caixaDoBotao.setPadding(new Insets(18, 0, 0, 0));
@@ -110,7 +110,10 @@ public class PainelDeslizante extends StackPane {
 
         VBox lista = new VBox(0);
         lista.setStyle("-fx-background-color: rgba(255,255,255,0.08);"
-                + "-fx-background-radius: " + EstiloIOS.RAIO + ";");
+                + "-fx-background-radius: " + EstiloDoMenu.RAIO + ";"
+                + "-fx-border-radius: " + EstiloDoMenu.RAIO + ";"
+                + "-fx-border-color: rgba(255,255,255,0.20);"
+                + "-fx-border-width: 2;");
         lista.setPadding(new Insets(2, 14, 2, 14));
         lista.setMaxWidth(larguraInterna);
 
@@ -122,7 +125,7 @@ public class PainelDeslizante extends StackPane {
             linha.setAlignment(Pos.CENTER_LEFT);
             linha.setPadding(new Insets(12, 0, 12, 0));
 
-            Label rotulo = EstiloIOS.rotulo(item.getKey(), 15, true, EstiloIOS.TEXTO);
+            Label rotulo = EstiloDoMenu.rotulo(item.getKey(), 15, true, EstiloDoMenu.TEXTO);
             rotulo.setMinWidth(Region.USE_PREF_SIZE);
 
             /*
@@ -130,7 +133,7 @@ public class PainelDeslizante extends StackPane {
                 Sem isso, um texto longo (a lista de creditos, por exemplo) invadia
                 o rotulo e os dois apareciam colados.
             */
-            Label valor = EstiloIOS.rotulo(item.getValue(), 15, false, EstiloIOS.TEXTO_SECUNDARIO);
+            Label valor = EstiloDoMenu.rotulo(item.getValue(), 15, false, EstiloDoMenu.TEXTO_SECUNDARIO);
             valor.setWrapText(true);
             valor.setMaxWidth(Double.MAX_VALUE);
             valor.setAlignment(Pos.CENTER_RIGHT);
@@ -141,7 +144,7 @@ public class PainelDeslizante extends StackPane {
             lista.getChildren().add(linha);
 
             if (--restantes > 0) {
-                lista.getChildren().add(EstiloIOS.separador(larguraInterna - 28));
+                lista.getChildren().add(EstiloDoMenu.separador(larguraInterna - 28));
             }
         }
 
