@@ -3,6 +3,7 @@ package org.example;
 import com.almasb.fxgl.app.ApplicationMode;
 import com.almasb.fxgl.app.GameApplication;
 import com.almasb.fxgl.app.GameSettings;
+import com.almasb.fxgl.app.scene.FXGLMenu;
 import com.almasb.fxgl.app.scene.LoadingScene;
 import com.almasb.fxgl.app.scene.SceneFactory;
 import com.almasb.fxgl.app.scene.Viewport;
@@ -19,6 +20,7 @@ import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
 import javafx.util.Duration;
 import org.example.ui.Hud;
+import org.example.ui.menu.MenuPrincipal;
 
 import java.util.function.Consumer;
 
@@ -64,14 +66,20 @@ public class Main extends GameApplication {
         settings.setHeight(ALTURA_DA_TELA);
 
         // Habilita os menus de configurações dentro do jogo
+        settings.setMainMenuEnabled(true);
         settings.setGameMenuEnabled(true);
         settings.setDeveloperMenuEnabled(true);
 
-        // Inicia a cena de carregamento
+        // Cena de carregamento e menu principal
         settings.setSceneFactory(new SceneFactory() {
             @Override
             public LoadingScene newLoadingScene() {
                 return new MainLoadingScene();
+            }
+
+            @Override
+            public FXGLMenu newMainMenu() {
+                return new MenuPrincipal();
             }
         });
 

@@ -7,6 +7,19 @@ Piolin enfrenta o **Espalha Lixo** enquanto tenta manter a floresta de pé: o in
 incendeia os objetos combustíveis espalhados pelo mapa, e cada objeto em chamas
 consome a vida da floresta.
 
+## Tela de início
+
+Ao abrir, o jogo mostra um menu principal com a linguagem visual do iOS: a arte da
+floresta entra desfocada como papel de parede, o botão **Jogar** usa a cor de destaque
+e os demais são botões de material translúcido. **Controles** e **Créditos** abrem
+folhas que sobem pela base da tela (o "sheet" do iOS), fechadas pelo botão Concluído
+ou por um clique fora delas.
+
+O visual fica todo em `ui/menu/EstiloIOS.java` — cores, cantos e a família tipográfica
+estão centralizados ali, então dá para mudar a aparência do menu inteiro editando um
+arquivo só. Como a fonte San Francisco não existe fora dos aparelhos da Apple, a classe
+escolhe em tempo de execução a primeira família parecida que estiver instalada.
+
 ## Como jogar
 
 | Barra | Significado |
@@ -72,6 +85,9 @@ Game/
     Floresta.java                   Vida coletiva da floresta
     ui/Hud.java                     Dono das barras de vida em tela
     ui/BarraDeVida.java             Barra: moldura + preenchimento
+    ui/menu/MenuPrincipal.java      Tela de início (menu principal)
+    ui/menu/EstiloIOS.java          Cores, fontes e botões no estilo iOS
+    ui/menu/PainelDeslizante.java   Folha inferior de Controles e Créditos
     utilitarios/Vida.java           Regra de vida pura (testável)
     utilitarios/FimDeJogo.java      Telas de vitória e derrota
   src/main/resources/assets/        Texturas, sons, música e mapa Tiled
