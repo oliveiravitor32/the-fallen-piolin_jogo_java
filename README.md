@@ -22,8 +22,23 @@ grossas e sombras duras. O papel de parede é a própria arte da floresta reduzi
 blocos (o desfoque seria o oposto de pixel art) e escurecida para os botões ficarem
 legíveis.
 
+## Menu de pausa
+
+`ESC` ou `P` durante a partida abrem o menu de pausa, no mesmo estilo da tela de
+início: **Continuar**, **Controles**, **Reiniciar**, **Menu principal** e **Sair**. Em
+vez de papel de parede ele usa só uma camada escura translúcida, para o jogador
+continuar vendo a partida pausada atrás.
+
+As confirmações de sair do jogo e de voltar ao menu também são nossas — o diálogo
+padrão do FXGL usava as cores e o acabamento da engine. Por isso as telas chamam
+`PaineisDoMenu.confirmarSaida(...)` em vez de `fireExit()`.
+
+As fontes da própria engine (`setFontUI`, `setFontGame`, `setFontText`, `setFontMono`
+em `Main.initSettings`) também apontam para a Pixelify Sans, então qualquer tela que o
+FXGL desenhe por conta própria continua com a fonte pixelada.
+
 O estilo fica todo em `ui/menu/EstiloDoMenu.java` — cores, cantos, espessuras e fontes
-estão centralizados ali, então dá para mudar a aparência do menu inteiro editando um
+estão centralizados ali, então dá para mudar a aparência dos dois menus editando um
 arquivo só. O tamanho dos blocos do papel de parede é a constante `TAMANHO_DO_BLOCO`
 em `ui/menu/MenuPrincipal.java`.
 
@@ -92,9 +107,12 @@ Game/
     Floresta.java                   Vida coletiva da floresta
     ui/Hud.java                     Dono das barras de vida em tela
     ui/BarraDeVida.java             Barra: moldura + preenchimento
+    ui/menu/MenuComEstilo.java      Base comum aos dois menus
     ui/menu/MenuPrincipal.java      Tela de início (menu principal)
-    ui/menu/EstiloDoMenu.java       Cores, fontes e botões do menu
-    ui/menu/PainelDeslizante.java   Folha inferior de Controles e Créditos
+    ui/menu/MenuDePausa.java        Menu de pausa (ESC ou P)
+    ui/menu/EstiloDoMenu.java       Cores, fontes e botões dos menus
+    ui/menu/PainelDeslizante.java   Folha inferior: listas e confirmações
+    ui/menu/PaineisDoMenu.java      Conteúdo das folhas, usado pelos dois menus
     utilitarios/Vida.java           Regra de vida pura (testável)
     utilitarios/FimDeJogo.java      Telas de vitória e derrota
   src/main/resources/assets/        Texturas, sons, música e mapa Tiled

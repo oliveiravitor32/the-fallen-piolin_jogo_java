@@ -20,6 +20,7 @@ import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
 import javafx.util.Duration;
 import org.example.ui.Hud;
+import org.example.ui.menu.MenuDePausa;
 import org.example.ui.menu.MenuPrincipal;
 
 import java.util.function.Consumer;
@@ -70,7 +71,7 @@ public class Main extends GameApplication {
         settings.setGameMenuEnabled(true);
         settings.setDeveloperMenuEnabled(true);
 
-        // Cena de carregamento e menu principal
+        // Cena de carregamento e menus (principal e de pausa)
         settings.setSceneFactory(new SceneFactory() {
             @Override
             public LoadingScene newLoadingScene() {
@@ -81,7 +82,22 @@ public class Main extends GameApplication {
             public FXGLMenu newMainMenu() {
                 return new MenuPrincipal();
             }
+
+            @Override
+            public FXGLMenu newGameMenu() {
+                return new MenuDePausa();
+            }
         });
+
+        /*
+            Fontes da propria engine. O FXGL usa estes arquivos em tudo o que desenha
+            por conta propria (notificacoes, menu de desenvolvimento, dialogos), entao
+            defini-las mantem a fonte pixelada mesmo nas telas que nao sao nossas.
+        */
+        settings.setFontUI("PixelifySans-Regular.ttf");
+        settings.setFontGame("PixelifySans-Bold.ttf");
+        settings.setFontText("PixelifySans-Regular.ttf");
+        settings.setFontMono("PixelifySans-Regular.ttf");
 
         settings.setApplicationMode(MODO_DA_APLICACAO);
     }

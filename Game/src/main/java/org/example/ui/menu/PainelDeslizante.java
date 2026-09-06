@@ -7,8 +7,10 @@ import javafx.animation.TranslateTransition;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Group;
+import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Pane;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
@@ -22,92 +24,84 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 /*
-    Folha que sobe pela base da tela, equivalente ao "sheet" do iOS.
+    Folha que sobe pela base da tela, no formato do "sheet" do iOS.
 
-    Usada pelos itens Controles e Creditos: uma camada escura cobre o menu, o painel
-    entra deslizando de baixo e sai da mesma forma. Clicar fora dele o fecha.
+    O conteudo e montado em partes, na ordem em que sao pedidas:
+
+        new PainelDeslizante(largura, altura, "Controles")
+                .comLista(itens(...))
+                .comRodape("...")
+                .comAcao("Concluido", Tipo.VIDRO, painel::fechar)
+
+    Serve tanto para telas de informacao (Controles, Creditos) quanto para
+    confirmacoes de duas opcoes, bastando trocar a lista por uma mensagem.
+
+    Uma camada escura cobre o que esta atras e fecha a folha ao ser clicada.
 */
 public class PainelDeslizante extends StackPane {
 
     private static final double LARGURA = 520;
     private static final double MARGEM_INTERNA = 24;
+    private static final double LARGURA_INTERNA = LARGURA - MARGEM_INTERNA * 2;
+    private static final double ALTURA_DO_BOTAO = 46;
     private static final Duration DURACAO = Duration.millis(320);
 
     private final StackPane fundoEscuro;
     private final VBox folha;
+    private final VBox acoes;
 
-    public PainelDeslizante(double larguraDaTela, double alturaDaTela,
-                            String titulo, Map<String, String> itens, String rodape) {
-
+    public PainelDeslizante(double larguraDaTela, double alturaDaTela, String titulo) {
         setPrefSize(larguraDaTela, alturaDaTela);
         setAlignment(Pos.BOTTOM_CENTER);
 
-        // Camada que escurece o menu atras da folha
+        // Camada que escurece o que esta atras da folha
         fundoEscuro = new StackPane(new Rectangle(larguraDaTela, alturaDaTela, Color.web("#000000", 0.55)));
         fundoEscuro.setPrefSize(larguraDaTela, alturaDaTela);
         fundoEscuro.setOnMouseClicked(evento -> fechar());
 
-        folha = montarFolha(titulo, itens, rodape);
-
-        getChildren().addAll(fundoEscuro, folha);
-    }
-
-    private VBox montarFolha(String titulo, Map<String, String> itens, String rodape) {
-        VBox conteudo = new VBox(0);
-        conteudo.setAlignment(Pos.TOP_CENTER);
-        conteudo.setPadding(new Insets(12, MARGEM_INTERNA, MARGEM_INTERNA, MARGEM_INTERNA));
-        conteudo.setMaxWidth(LARGURA);
-        conteudo.setPrefWidth(LARGURA);
+        folha = new VBox(0);
+        folha.setAlignment(Pos.TOP_CENTER);
+        folha.setPadding(new Insets(12, MARGEM_INTERNA, MARGEM_INTERNA, MARGEM_INTERNA));
+        folha.setMaxWidth(LARGURA);
+        folha.setPrefWidth(LARGURA);
 
         /*
             Sem esta linha o StackPane estica a folha ate a altura inteira da tela
             (o maxHeight padrao de um VBox e infinito) e o alinhamento na base nao
-            tem efeito algum. Fixando no tamanho preferido, ela vira uma folha compacta
-            encostada embaixo, como no iOS.
+            tem efeito algum. Fixando no tamanho preferido, ela vira uma folha
+            compacta encostada embaixo.
         */
-        conteudo.setMaxHeight(javafx.scene.layout.Region.USE_PREF_SIZE);
+        folha.setMaxHeight(Region.USE_PREF_SIZE);
 
-        /*
-            O material de fundo e um retangulo arredondado atras do conteudo. Como a
-            folha encosta na base da tela, so os cantos de cima ficam visiveis.
-        */
-        conteudo.setStyle(
+        // Bordas so nos tres lados visiveis: a base fica fora da tela
+        folha.setStyle(
                 "-fx-background-color: " + EstiloDoMenu.MATERIAL_ESCURO + ";"
                         + "-fx-background-radius: " + EstiloDoMenu.RAIO_PAINEL + " "
+                        + EstiloDoMenu.RAIO_PAINEL + " 0 0;"
+                        + "-fx-border-color: rgba(255,255,255,0.20);"
+                        + "-fx-border-width: " + EstiloDoMenu.BORDA + " " + EstiloDoMenu.BORDA
+                        + " 0 " + EstiloDoMenu.BORDA + ";"
+                        + "-fx-border-radius: " + EstiloDoMenu.RAIO_PAINEL + " "
                         + EstiloDoMenu.RAIO_PAINEL + " 0 0;");
 
-        conteudo.getChildren().add(new Group(EstiloDoMenu.alca()));
+        folha.getChildren().add(new Group(EstiloDoMenu.alca()));
 
         VBox cabecalho = new VBox(EstiloDoMenu.texto(titulo, 22, true, EstiloDoMenu.TEXTO));
         cabecalho.setAlignment(Pos.CENTER);
         cabecalho.setPadding(new Insets(16, 0, 14, 0));
-        conteudo.getChildren().add(cabecalho);
+        folha.getChildren().add(cabecalho);
 
-        conteudo.getChildren().add(montarLista(itens));
+        // As acoes ficam sempre no rodape: o conteudo e inserido acima delas
+        acoes = new VBox(10);
+        acoes.setAlignment(Pos.CENTER);
+        acoes.setPadding(new Insets(18, 0, 0, 0));
+        folha.getChildren().add(acoes);
 
-        if (rodape != null && !rodape.isBlank()) {
-            VBox caixaDoRodape = new VBox(EstiloDoMenu.texto(rodape, 13, false, EstiloDoMenu.TEXTO_SECUNDARIO));
-            caixaDoRodape.setAlignment(Pos.CENTER);
-            caixaDoRodape.setPadding(new Insets(14, 0, 0, 0));
-            conteudo.getChildren().add(caixaDoRodape);
-        }
-
-        VBox caixaDoBotao = new VBox(EstiloDoMenu.botao("Concluído", EstiloDoMenu.Tipo.VIDRO,
-                LARGURA - MARGEM_INTERNA * 2, 46, this::fechar));
-        caixaDoBotao.setAlignment(Pos.CENTER);
-        caixaDoBotao.setPadding(new Insets(18, 0, 0, 0));
-        conteudo.getChildren().add(caixaDoBotao);
-
-        return conteudo;
+        getChildren().addAll(fundoEscuro, folha);
     }
 
-    /*
-        Lista agrupada do iOS: cada linha tem o rotulo a esquerda, o valor a direita
-        e uma linha fina de separacao entre elas (menos depois da ultima).
-    */
-    private VBox montarLista(Map<String, String> itens) {
-        double larguraInterna = LARGURA - MARGEM_INTERNA * 2;
-
+    /** Cartao agrupado com rotulo a esquerda e valor a direita, um item por linha. */
+    public PainelDeslizante comLista(Map<String, String> itens) {
         VBox lista = new VBox(0);
         lista.setStyle("-fx-background-color: rgba(255,255,255,0.08);"
                 + "-fx-background-radius: " + EstiloDoMenu.RAIO + ";"
@@ -115,7 +109,7 @@ public class PainelDeslizante extends StackPane {
                 + "-fx-border-color: rgba(255,255,255,0.20);"
                 + "-fx-border-width: 2;");
         lista.setPadding(new Insets(2, 14, 2, 14));
-        lista.setMaxWidth(larguraInterna);
+        lista.setMaxWidth(LARGURA_INTERNA);
 
         int restantes = itens.size();
 
@@ -144,18 +138,61 @@ public class PainelDeslizante extends StackPane {
             lista.getChildren().add(linha);
 
             if (--restantes > 0) {
-                lista.getChildren().add(EstiloDoMenu.separador(larguraInterna - 28));
+                lista.getChildren().add(EstiloDoMenu.separador(LARGURA_INTERNA - 28));
             }
         }
 
-        return lista;
+        return inserirAntesDasAcoes(lista);
+    }
+
+    /** Texto centralizado, usado nas confirmacoes no lugar da lista. */
+    public PainelDeslizante comMensagem(String mensagem) {
+        return inserirAntesDasAcoes(
+                caixaDeTexto(mensagem, 16, EstiloDoMenu.TEXTO, new Insets(4, 0, 10, 0)));
+    }
+
+    /** Observacao em texto menor, abaixo do conteudo principal. */
+    public PainelDeslizante comRodape(String rodape) {
+        return inserirAntesDasAcoes(
+                caixaDeTexto(rodape, 13, EstiloDoMenu.TEXTO_SECUNDARIO, new Insets(14, 0, 0, 0)));
+    }
+
+    private VBox caixaDeTexto(String conteudo, double tamanho, Color cor, Insets espacamento) {
+        Label texto = EstiloDoMenu.rotulo(conteudo, tamanho, false, cor);
+        texto.setWrapText(true);
+        texto.setMaxWidth(LARGURA_INTERNA);
+        texto.setAlignment(Pos.CENTER);
+        texto.setTextAlignment(TextAlignment.CENTER);
+
+        VBox caixa = new VBox(texto);
+        caixa.setAlignment(Pos.CENTER);
+        caixa.setPadding(espacamento);
+
+        return caixa;
+    }
+
+    /** Botao de rodape. Podem ser varios: aparecem empilhados na ordem pedida. */
+    public PainelDeslizante comAcao(String rotulo, EstiloDoMenu.Tipo tipo, Runnable acao) {
+        acoes.getChildren().add(
+                EstiloDoMenu.botao(rotulo, tipo, LARGURA_INTERNA, ALTURA_DO_BOTAO, acao));
+
+        return this;
+    }
+
+    /** Botao que apenas recolhe a folha, como o "Concluido" e o "Cancelar". */
+    public PainelDeslizante comAcaoDeFechar(String rotulo) {
+        return comAcao(rotulo, EstiloDoMenu.Tipo.VIDRO, this::fechar);
+    }
+
+    private PainelDeslizante inserirAntesDasAcoes(Node conteudo) {
+        folha.getChildren().add(folha.getChildren().indexOf(acoes), conteudo);
+
+        return this;
     }
 
     /** Faz a folha entrar deslizando de baixo, com a camada escura surgindo junto. */
     public void abrir() {
-        setVisible(true);
-
-        folha.setTranslateY(folha.prefHeight(-1) + 60);
+        folha.setTranslateY(alturaOculta());
         fundoEscuro.setOpacity(0);
 
         animar(0, 1, Interpolator.SPLINE(0.32, 0.72, 0, 1)).play();
@@ -165,18 +202,23 @@ public class PainelDeslizante extends StackPane {
         Recolhe a folha e a descarta ao terminar.
 
         Remover o painel da arvore (em vez de apenas escondê-lo) evita acumular uma
-        folha invisivel a cada vez que Controles ou Creditos e aberto.
+        folha invisivel a cada vez que um painel e aberto.
     */
     public void fechar() {
-        ParallelTransition saida = animar(folha.prefHeight(-1) + 60, 0, Interpolator.EASE_IN);
+        ParallelTransition saida = animar(alturaOculta(), 0, Interpolator.EASE_IN);
 
         saida.setOnFinished(evento -> {
-            if (getParent() instanceof javafx.scene.layout.Pane pai) {
+            if (getParent() instanceof Pane pai) {
                 pai.getChildren().remove(this);
             }
         });
 
         saida.play();
+    }
+
+    /** Deslocamento que esconde a folha inteira abaixo da borda da tela. */
+    private double alturaOculta() {
+        return folha.prefHeight(-1) + 60;
     }
 
     private ParallelTransition animar(double destinoY, double opacidadeDoFundo, Interpolator suavizacao) {
@@ -190,7 +232,7 @@ public class PainelDeslizante extends StackPane {
         return new ParallelTransition(deslize, escurecimento);
     }
 
-    /** Atalho para montar os itens preservando a ordem de insercao. */
+    /** Atalho para montar os itens de uma lista preservando a ordem de insercao. */
     public static Map<String, String> itens(String... paresRotuloValor) {
         Map<String, String> mapa = new LinkedHashMap<>();
 
