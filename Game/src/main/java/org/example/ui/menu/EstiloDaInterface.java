@@ -1,14 +1,21 @@
 package org.example.ui.menu;
 
-import com.almasb.fxgl.dsl.FXGL;
-import com.almasb.fxgl.ui.FontFactory;
+import javafx.animation.FadeTransition;
+import javafx.animation.Interpolator;
+import javafx.animation.TranslateTransition;
+import java.io.IOException;
+import java.io.InputStream;
+
 import javafx.scene.Cursor;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
+import javafx.scene.text.FontWeight;
+import javafx.scene.layout.Region;
 import javafx.scene.text.Text;
+import javafx.util.Duration;
 
 /*
     Estilo da interface: a ARRUMACAO vem do iOS, a APARENCIA vem do pixel art.
@@ -52,35 +59,68 @@ public final class EstiloDaInterface {
     public static final double RAIO_PAINEL = 6;
     public static final double BORDA = 3;
 
+    // Movimento de entrada compartilhado pelas telas
+    private static final Duration DURACAO_DA_ENTRADA = Duration.millis(420);
+    private static final double SUBIDA_DA_ENTRADA = 22;
+
+    private static final String PASTA_DAS_FONTES = "/assets/ui/fonts/";
     private static final String FONTE_REGULAR = "PixelifySans-Regular.ttf";
     private static final String FONTE_NEGRITO = "PixelifySans-Bold.ttf";
 
-    // Carregadas sob demanda: o servico de assets do FXGL so existe apos a inicializacao
-    private static FontFactory fabricaRegular;
-    private static FontFactory fabricaNegrito;
+    /*
+        As fontes sao carregadas direto do classpath, e nao pelo servico de assets do
+        FXGL.
+
+        O motivo e a tela de inicializacao: ela e construida ANTES de o motor registrar
+        seus servicos, entao chamar FXGL.getAssetLoader() ali derruba o jogo com
+        "Engine does not have service: FXGLAssetLoaderService". Carregando pelo
+        classpath, a mesma classe de estilo serve todas as telas, do primeiro quadro
+        ao fim de jogo.
+    */
+    private static String familiaRegular;
+    private static String familiaNegrito;
 
     private EstiloDaInterface() {
         // Classe utilitaria: nao deve ser instanciada.
     }
 
-    private static FontFactory fabrica(boolean negrito) {
-        if (negrito) {
-            if (fabricaNegrito == null) {
-                fabricaNegrito = FXGL.getAssetLoader().loadFont(FONTE_NEGRITO);
+    private static void registrarFontes() {
+        if (familiaRegular != null) {
+            return;
+        }
+
+        familiaRegular = carregarFamilia(FONTE_REGULAR);
+        familiaNegrito = carregarFamilia(FONTE_NEGRITO);
+    }
+
+    /*
+        Devolve o nome da familia registrada pelo arquivo. Se a fonte nao puder ser
+        lida, cai na fonte padrao do sistema: o jogo continua legivel em vez de nao abrir.
+    */
+    private static String carregarFamilia(String arquivo) {
+        try (InputStream entrada = EstiloDaInterface.class.getResourceAsStream(PASTA_DAS_FONTES + arquivo)) {
+            if (entrada != null) {
+                Font carregada = Font.loadFont(entrada, 12);
+
+                if (carregada != null) {
+                    return carregada.getFamily();
+                }
             }
-
-            return fabricaNegrito;
+        }
+        catch (IOException excecao) {
+            // Tratado abaixo, junto com os demais casos de falha
         }
 
-        if (fabricaRegular == null) {
-            fabricaRegular = FXGL.getAssetLoader().loadFont(FONTE_REGULAR);
-        }
+        System.err.println("Nao foi possivel carregar a fonte " + arquivo + "; usando a fonte padrao.");
 
-        return fabricaRegular;
+        return Font.getDefault().getFamily();
     }
 
     public static Font fonte(double tamanho, boolean negrito) {
-        return fabrica(negrito).newFont(tamanho);
+        registrarFontes();
+
+        return Font.font(negrito ? familiaNegrito : familiaRegular,
+                negrito ? FontWeight.BOLD : FontWeight.NORMAL, tamanho);
     }
 
     public static Text texto(String conteudo, double tamanho, boolean negrito, Color cor) {
@@ -163,6 +203,29 @@ public final class EstiloDaInterface {
                         // Remove o anel de foco padrao do JavaFX, que destoa do visual
                         + "-fx-focus-color: transparent;"
                         + "-fx-faint-focus-color: transparent;");
+    }
+
+    /*
+        Entrada padrao das telas: o elemento surge subindo alguns pixels. Fica aqui
+        para os menus, o fim de jogo e qualquer tela futura usarem o mesmo movimento.
+    */
+    public static void animarEntrada(Region alvo, Duration atraso) {
+        alvo.setOpacity(0);
+        alvo.setTranslateY(SUBIDA_DA_ENTRADA);
+
+        FadeTransition surgimento =
+                new FadeTransition(DURACAO_DA_ENTRADA, alvo);
+        surgimento.setToValue(1);
+        surgimento.setDelay(atraso);
+
+        TranslateTransition subida =
+                new TranslateTransition(DURACAO_DA_ENTRADA, alvo);
+        subida.setToY(0);
+        subida.setInterpolator(Interpolator.SPLINE(0.32, 0.72, 0, 1));
+        subida.setDelay(atraso);
+
+        surgimento.play();
+        subida.play();
     }
 
     /** Alca retangular no topo da folha, sem cantos arredondados. */

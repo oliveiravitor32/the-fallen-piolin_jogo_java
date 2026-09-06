@@ -6,6 +6,7 @@ import com.almasb.fxgl.app.GameSettings;
 import com.almasb.fxgl.app.scene.FXGLMenu;
 import com.almasb.fxgl.app.scene.LoadingScene;
 import com.almasb.fxgl.app.scene.SceneFactory;
+import com.almasb.fxgl.app.scene.StartupScene;
 import com.almasb.fxgl.app.scene.Viewport;
 import com.almasb.fxgl.dsl.FXGL;
 import com.almasb.fxgl.entity.Entity;
@@ -63,6 +64,9 @@ public class Main extends GameApplication {
         settings.setVersion("1.0.0");
         settings.setTitle("The Fallen Piolin");
 
+        // Icone da barra de titulo e da barra de tarefas
+        settings.setAppIcon("A1piolinPNG1.png");
+
         settings.setWidth(LARGURA_DA_TELA);
         settings.setHeight(ALTURA_DA_TELA);
 
@@ -73,6 +77,11 @@ public class Main extends GameApplication {
 
         // Cena de carregamento e menus (principal e de pausa)
         settings.setSceneFactory(new SceneFactory() {
+            @Override
+            public StartupScene newStartup(int largura, int altura) {
+                return new MainStartupScene(largura, altura);
+            }
+
             @Override
             public LoadingScene newLoadingScene() {
                 return new MainLoadingScene();

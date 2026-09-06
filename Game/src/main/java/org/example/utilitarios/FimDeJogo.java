@@ -2,7 +2,7 @@ package org.example.utilitarios;
 
 import com.almasb.fxgl.dsl.FXGL;
 import org.example.ui.menu.EstiloDaInterface;
-import org.example.ui.menu.PainelDeslizante;
+import org.example.ui.menu.PainelCentral;
 
 import static com.almasb.fxgl.dsl.FXGL.getAppHeight;
 import static com.almasb.fxgl.dsl.FXGL.getAppWidth;
@@ -13,8 +13,8 @@ import static com.almasb.fxgl.dsl.FXGLForKtKt.getGameController;
     Telas de fim de partida (vitoria e derrota).
 
     Antes eram um retangulo colorido com um Button padrao do JavaFX, montado a mao em
-    dois blocos quase identicos. Agora reusam a mesma folha deslizante dos menus, de
-    modo que o fim de jogo tem o mesmo acabamento do resto da interface.
+    dois blocos quase identicos. Agora usam o PainelCentral, com a mesma arrumacao
+    das demais telas cheias do jogo.
 */
 public class FimDeJogo {
 
@@ -40,17 +40,17 @@ public class FimDeJogo {
     }
 
     /*
-        A folha nao pode ser dispensada com um clique fora: o motor fica pausado atras
-        dela, entao dispensa-la deixaria o jogador preso numa partida congelada.
+        O desfecho ocupa o centro da tela, com a mesma arrumacao dos menus, e nao ha
+        como dispensa-lo: o motor fica pausado atras, entao sair dele sem escolher uma
+        das acoes deixaria o jogador preso numa partida congelada.
     */
     private static void mostrar(String titulo, String mensagem, String rotuloDeReinicio) {
         getGameController().pauseEngine();
 
-        PainelDeslizante painel = new PainelDeslizante(getAppWidth(), getAppHeight(), titulo)
+        PainelCentral painel = new PainelCentral(getAppWidth(), getAppHeight(), titulo)
                 .comMensagem(mensagem)
                 .comAcao(rotuloDeReinicio, EstiloDaInterface.Tipo.PRIMARIO, FimDeJogo::reiniciar)
-                .comAcao("Menu principal", EstiloDaInterface.Tipo.VIDRO, FimDeJogo::voltarAoMenu)
-                .semFecharAoClicarFora();
+                .comAcao("Menu principal", EstiloDaInterface.Tipo.VIDRO, FimDeJogo::voltarAoMenu);
 
         getGameScene().addUINode(painel);
         painel.abrir();
