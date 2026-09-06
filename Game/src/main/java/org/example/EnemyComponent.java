@@ -1,6 +1,7 @@
 package org.example;
 
 import com.almasb.fxgl.audio.Sound;
+import com.almasb.fxgl.core.math.FXGLMath;
 import com.almasb.fxgl.dsl.FXGL;
 import com.almasb.fxgl.dsl.components.OffscreenCleanComponent;
 import com.almasb.fxgl.dsl.components.ProjectileComponent;
@@ -9,94 +10,57 @@ import com.almasb.fxgl.entity.component.Component;
 import com.almasb.fxgl.physics.PhysicsComponent;
 import com.almasb.fxgl.texture.AnimatedTexture;
 import com.almasb.fxgl.texture.AnimationChannel;
-
 import com.almasb.fxgl.time.TimerAction;
-import javafx.fxml.FXMLLoader;
 import javafx.geometry.Point2D;
 import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
-
-import javafx.scene.paint.Color;
-import javafx.scene.shape.Rectangle;
 import javafx.util.Duration;
+import org.example.ui.Hud;
 import org.example.utilitarios.FimDeJogo;
+import org.example.utilitarios.Vida;
 
-import java.io.IOException;
-import java.util.Random;
-import java.util.Timer;
-import java.util.TimerTask;
-
-
-import static com.almasb.fxgl.dsl.FXGL.getAppWidth;
-import static com.almasb.fxgl.dsl.FXGL.getGameScene;
-import static com.almasb.fxgl.dsl.FXGLForKtKt.*;
+import static com.almasb.fxgl.dsl.FXGLForKtKt.entityBuilder;
+import static com.almasb.fxgl.dsl.FXGLForKtKt.image;
 import static org.example.EntityType.DISPARO_INIMIGO;
 
-
+/*
+    Componente do inimigo (Espalha Lixo): movimentação, disparo de fogo e vida.
+*/
 public class EnemyComponent extends Component {
+
+    private static final double ESCALA = 0.8;
+    private static final int VIDA_MAXIMA = 30;
+    private static final double VELOCIDADE = 180;
+    private static final Duration ESPERA_ENTRE_DISPAROS = Duration.millis(600);
+    private static final Duration INTERVALO_DE_MOVIMENTACAO = Duration.seconds(1);
+    private static final Duration DURACAO_DA_PARADA = Duration.millis(400);
+    private static final double VELOCIDADE_DO_PROJETIL = 300;
 
     private PhysicsComponent physics;
 
-    //Injetando componentes para gerar animação ao visual (sprite) do jogador
-    private AnimatedTexture texture;
-    private AnimationChannel animIdle, animWalk, animTiro;
+    // Injetando componentes para gerar animação ao visual (sprite) do inimigo
+    private final AnimatedTexture texture;
+    private final AnimationChannel animIdle, animWalk, animTiro;
 
-    private int life = 30;
+    private final Vida vida = new Vida(VIDA_MAXIMA);
+    private final Hud hud;
 
-    // Definindo a barra de vida
-    private Rectangle barra_de_vida;
-
-    private double escalaDoPersonagem = 0.8;
-    private boolean metodoPararFoiUtilizado = false;
-    private double guardaUltimaMovimentacao = 0.00;
-
-    private int velocidadeDoPersonagem = 180;
-
+    private boolean estaParado = false;
+    private double ultimaDirecao = VELOCIDADE;
     private boolean tiroEmEspera = false;
     private TimerAction tarefaDeMovimentacaoAleatoria;
 
-    public EnemyComponent() {
+    public EnemyComponent(Hud hud) {
+        this.hud = hud;
 
         // Definindo o PNG com os quadros (frames) de animação
         Image image = image("whole-espalha-lixot.png");
 
-        // Definindo animação para inimigo parado
         animIdle = new AnimationChannel(image, 6, 64, 64, Duration.seconds(1), 0, 0);
-
-        // Definindo animação para inimigo andando
         animWalk = new AnimationChannel(image, 6, 64, 64, Duration.seconds(1), 4, 5);
-
-        // Definindo animação para inimigo atirando
         animTiro = new AnimationChannel(image, 6, 64, 64, Duration.seconds(0.16), 2, 3);
 
-
-        // Colocando a primeira textura do jogodor ao ser invocado
-        // animIdle = parado
         texture = new AnimatedTexture(animWalk);
-        // Loop para gerar a animação
         texture.loop();
-
-
-        // Definindo imagem de borda para a barra de vida do Espalha Lixo
-        Image imagemBarraDeVidaDiretorio = new Image("assets/textures/barra_de_vida_espalha_lixo.png");
-        ImageView imagemBarraDeVida = new ImageView(imagemBarraDeVidaDiretorio);
-        imagemBarraDeVida.setFitHeight(38);
-
-        imagemBarraDeVida.setX(getAppWidth() - 200);
-        imagemBarraDeVida.setY(50);
-        imagemBarraDeVida.setPreserveRatio(true);
-
-        getGameScene().addUINode(imagemBarraDeVida);
-
-        // Barra de vida dinâmica
-        barra_de_vida = new Rectangle(100, 30, Color.DARKRED);
-        barra_de_vida.setX(getAppWidth() - 164);
-        barra_de_vida.setY(54);
-
-        getGameScene().addUINode(barra_de_vida);
-
-        // Definindo movimentação aleatória
-        tarefaDeMovimentacaoAleatoria = FXGL.run(this::movimentacaoAleatoria, Duration.seconds(1));
     }
 
     @Override
@@ -104,149 +68,140 @@ public class EnemyComponent extends Component {
         entity.getTransformComponent().setScaleOrigin(new Point2D(25, 21));
         entity.getViewComponent().addChild(texture);
 
-        // Escala do personagem
-        entity.setScaleX(escalaDoPersonagem);
-        entity.setScaleY(escalaDoPersonagem);
+        entity.setScaleX(ESCALA);
+        entity.setScaleY(ESCALA);
+
+        hud.atualizarEspalhaLixo(vida.getFracao());
+
+        /*
+            A movimentação aleatória só começa depois que a entidade entra no mundo.
+            Se fosse iniciada no construtor (como era antes), o temporizador poderia
+            disparar antes de o corpo físico existir.
+        */
+        tarefaDeMovimentacaoAleatoria = FXGL.run(this::movimentacaoAleatoria, INTERVALO_DE_MOVIMENTACAO);
     }
 
     @Override
     public void onRemoved() {
-        // Stop the loop when entity is removed from the world
+        // Encerra o temporizador para não continuar rodando após a morte do inimigo
         if (tarefaDeMovimentacaoAleatoria != null) {
             tarefaDeMovimentacaoAleatoria.expire();
+            tarefaDeMovimentacaoAleatoria = null;
         }
     }
 
     @Override
     public void onUpdate(double tpf) {
-
-        if (!metodoPararFoiUtilizado) {
-            if(guardaUltimaMovimentacao > 0) {
-                physics.setVelocityX(velocidadeDoPersonagem);
-            } else {
-                physics.setVelocityX(-velocidadeDoPersonagem);
-            }
+        if (!estaParado) {
+            physics.setVelocityX(ultimaDirecao > 0 ? VELOCIDADE : -VELOCIDADE);
         }
     }
 
     public void tomaDano() {
-        life--;
-        barra_de_vida.setWidth(barra_de_vida.getWidth()-3.33);
-        if (life <= 0 ) {
-            //tarefaDeMovimentacaoAleatoria.cancel();
+        vida.tomarDano(1);
+        hud.atualizarEspalhaLixo(vida.getFracao());
+
+        if (vida.estaZerada()) {
             entity.removeFromWorld();
             FimDeJogo.terminarWinner();
+            return;
         }
 
-        if (life == 4 || life == 15 || life == 22) {
-            Sound som_haha = FXGL.getAssetLoader().loadSound("haha.wav");
-            som_haha.getAudio().setVolume(0.5);
-            som_haha.getAudio().play();
-            //FXGL.play("haha.wav");
+        int restante = vida.getAtual();
+
+        if (restante == 4 || restante == 15 || restante == 22) {
+            tocar("haha.wav", 0.5);
         }
-        else if (life == 8 || life == 18 || life == 28){
-            Sound som_vai_queimar= FXGL.getAssetLoader().loadSound("vaiqueimar.wav");
-            som_vai_queimar.getAudio().setVolume(0.8);
-            som_vai_queimar.getAudio().play();
-            FXGL.play("vaiqueimar.wav");
+        else if (restante == 8 || restante == 18 || restante == 28) {
+            tocar("vaiqueimar.wav", 0.8);
         }
     }
 
-    public void atirar(Entity entidadeParaAtirar) {
-        if(!tiroEmEspera) {
-            double direcaoDoProjetil = getEntity().getCenter().getX();;
-            double origemDoProjetilEixoY = getEntity().getCenter().getY() - 28;
-            double origemDoProjetilEixoX = direcaoDoProjetil;
-            double mudaEscalaDaImagemParaDirecaoDoProjetil = 1;
-
-
-            if (getEntity().getPosition().getX() > entidadeParaAtirar.getPosition().getX()) {
-                origemDoProjetilEixoX -= 40;
-                direcaoDoProjetil = -direcaoDoProjetil;
-
-                mudaEscalaDaImagemParaDirecaoDoProjetil = -0.8;
-                getEntity().getComponent(EnemyComponent.class).moveParaEsquerda();
-            } else {
-                getEntity().getComponent(EnemyComponent.class).moveParaDireita();
-            }
-
-            Image image = image("tiro_de_fogo.png");
-            AnimationChannel animacaoTiro = new AnimationChannel(image, 4, 32, 32, Duration.seconds(0.1), 0, 3);
-
-            AnimatedTexture visualAnimadoTiro = new AnimatedTexture(animacaoTiro);
-
-
-            Sound som_bazuca = FXGL.getAssetLoader().loadSound("fire_launcher.wav");
-            som_bazuca.getAudio().setVolume(0.5);
-            som_bazuca.getAudio().play();
-            //FXGL.play("fire_launcher.wav");
-
-
-            if (life == 28 || life == 15 || life == 12 || life == 10 || life == 5 || life == 1) {
-                Sound som_grito_fogo = FXGL.getAssetLoader().loadSound("fogo.wav");
-                som_grito_fogo.getAudio().setVolume(0.5);
-                som_grito_fogo.getAudio().play();
-                //FXGL.play("fogo.wav");
-            }
-
-
-            Point2D direction = new Point2D(direcaoDoProjetil, 0);
-
-            entityBuilder()
-                    .at(origemDoProjetilEixoX, origemDoProjetilEixoY)
-                    .type(DISPARO_INIMIGO)
-                    .viewWithBBox(visualAnimadoTiro)
-                    .collidable()
-                    .with(new ProjectileComponent(direction, 300))
-                    .with(new OffscreenCleanComponent())
-                    .scale(0.8, mudaEscalaDaImagemParaDirecaoDoProjetil)
-                    .buildAndAttach();
-
-
-            texture.playAnimationChannel(animTiro);
-
-            // Volta o loop em animação normal após animação de tiro
-            texture.setOnCycleFinished(() -> {texture.loopAnimationChannel(animIdle);});
-
-            // Tempo de espera entre tiros
-            tiroEmEspera = true;
-            FXGL.getGameTimer().runOnceAfter(() -> tiroEmEspera = false, Duration.millis(600));
+    public void atirar(Entity alvo) {
+        if (tiroEmEspera) {
+            return;
         }
+
+        boolean paraEsquerda = getEntity().getPosition().getX() > alvo.getPosition().getX();
+
+        double origemY = getEntity().getCenter().getY() - 28;
+        double origemX = getEntity().getCenter().getX() - (paraEsquerda ? 40 : 0);
+
+        // Vetor unitário: a direção do projétil não depende de onde o inimigo está no mapa
+        Point2D direcao = new Point2D(paraEsquerda ? -1 : 1, 0);
+        double escalaVertical = paraEsquerda ? -ESCALA : ESCALA;
+
+        if (paraEsquerda) {
+            moveParaEsquerda();
+        }
+        else {
+            moveParaDireita();
+        }
+
+        AnimationChannel animacaoDoTiro =
+                new AnimationChannel(image("tiro_de_fogo.png"), 4, 32, 32, Duration.seconds(0.1), 0, 3);
+
+        tocar("fire_launcher.wav", 0.5);
+
+        int restante = vida.getAtual();
+
+        if (restante == 28 || restante == 15 || restante == 12
+                || restante == 10 || restante == 5 || restante == 1) {
+            tocar("fogo.wav", 0.5);
+        }
+
+        entityBuilder()
+                .at(origemX, origemY)
+                .type(DISPARO_INIMIGO)
+                .viewWithBBox(new AnimatedTexture(animacaoDoTiro))
+                .collidable()
+                .with(new ProjectileComponent(direcao, VELOCIDADE_DO_PROJETIL))
+                .with(new OffscreenCleanComponent())
+                .scale(ESCALA, escalaVertical)
+                .buildAndAttach();
+
+        texture.playAnimationChannel(animTiro);
+
+        // Volta ao loop de animação normal após a animação de tiro
+        texture.setOnCycleFinished(() -> texture.loopAnimationChannel(animIdle));
+
+        tiroEmEspera = true;
+        FXGL.getGameTimer().runOnceAfter(() -> tiroEmEspera = false, ESPERA_ENTRE_DISPAROS);
     }
 
-    public void moveParaEsquerda(){
+    public void moveParaEsquerda() {
         texture.loopAnimationChannel(animWalk);
-        getEntity().setScaleX(-escalaDoPersonagem);
-        physics.setVelocityX(-velocidadeDoPersonagem);
-        guardaUltimaMovimentacao = -velocidadeDoPersonagem;
+        getEntity().setScaleX(-ESCALA);
+        physics.setVelocityX(-VELOCIDADE);
+        ultimaDirecao = -VELOCIDADE;
     }
 
-    public void moveParaDireita(){
+    public void moveParaDireita() {
         texture.loopAnimationChannel(animWalk);
-        getEntity().setScaleX(escalaDoPersonagem);
-        physics.setVelocityX(velocidadeDoPersonagem);
-        guardaUltimaMovimentacao = velocidadeDoPersonagem;
+        getEntity().setScaleX(ESCALA);
+        physics.setVelocityX(VELOCIDADE);
+        ultimaDirecao = VELOCIDADE;
     }
 
     public void pararPersonagem() {
-        metodoPararFoiUtilizado = true;
-
+        estaParado = true;
         physics.setVelocityX(0);
 
-        FXGL.getGameTimer().runOnceAfter(() -> metodoPararFoiUtilizado = false, Duration.millis(400));
+        FXGL.getGameTimer().runOnceAfter(() -> estaParado = false, DURACAO_DA_PARADA);
     }
 
-    public void movimentacaoAleatoria() {
-        Random random = new Random();
-
-        // Gerar um número inteiro aleatório entre 0 e 2
-        int decisaoAleatoriaDeMovimentacao = random.nextInt(2);
-
-        if (decisaoAleatoriaDeMovimentacao == 0) {
+    private void movimentacaoAleatoria() {
+        if (FXGLMath.randomBoolean()) {
             moveParaDireita();
         }
         else {
             moveParaEsquerda();
         }
+    }
+
+    private void tocar(String arquivo, double volume) {
+        Sound som = FXGL.getAssetLoader().loadSound(arquivo);
+        som.getAudio().setVolume(volume);
+        som.getAudio().play();
     }
 }

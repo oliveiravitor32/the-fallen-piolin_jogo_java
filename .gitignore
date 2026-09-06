@@ -22,3 +22,16 @@
 # virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
 hs_err_pid*
 replay_pid*
+
+# Build do Maven
+target/
+
+# Configuracoes de IDE
+.idea/
+*.iml
+*.iws
+*.ipr
+
+# FXGL grava logs e preferencias locais em tempo de execucao
+Game/logs/
+Game/system/fxgl.bundle

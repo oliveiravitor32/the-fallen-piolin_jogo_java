@@ -1,13 +1,7 @@
 package org.example;
 
 import com.almasb.fxgl.animation.Interpolators;
-import com.almasb.fxgl.app.GameSettings;
-import com.almasb.fxgl.app.scene.GameView;
 import com.almasb.fxgl.app.scene.LoadingScene;
-import com.almasb.fxgl.app.scene.Viewport;
-import com.almasb.fxgl.dsl.FXGL;
-import com.almasb.fxgl.dsl.FXGLForKtKt;
-import com.almasb.fxgl.ui.UIFactoryService;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
@@ -20,7 +14,7 @@ import static com.almasb.fxgl.dsl.FXGLForKtKt.getUIFactoryService;
 import static com.almasb.fxgl.dsl.FXGL.*;
 
 /*
-     ESTÁ CLASSE É RESPONSÁVEL POR CRIAR A CENA DE CARREGAMENTO (LOADING) DO JOGO!
+     ESTA CLASSE É RESPONSÁVEL POR CRIAR A CENA DE CARREGAMENTO (LOADING) DO JOGO!
  */
 
 public class MainLoadingScene extends LoadingScene {
@@ -50,9 +44,12 @@ public class MainLoadingScene extends LoadingScene {
         hbox.setTranslateX(getAppWidth() / 2 - 20);
         hbox.setTranslateY(getAppHeight() / 2);
 
-        var playerTexture = texture("player.png").subTexture(new Rectangle2D(0, 0, 32, 42));
-        playerTexture.setTranslateX(getAppWidth() / 2 - 32/2);
-        playerTexture.setTranslateY(getAppHeight() / 2 - 42/2);
+        // Primeiro quadro (64x64) da folha de sprites do Piolin.
+        // Antes esta linha pedia "player.png", arquivo que não existe no projeto: o FXGL
+        // caía num placeholder e registrava apenas um aviso no console.
+        var playerTexture = texture("walk_piolin1-Sheet.png").subTexture(new Rectangle2D(0, 0, 64, 64));
+        playerTexture.setTranslateX(getAppWidth() / 2.0 - 32);
+        playerTexture.setTranslateY(getAppHeight() / 2.0 - 32);
 
         animationBuilder(this)
                 .duration(Duration.seconds(1.25))

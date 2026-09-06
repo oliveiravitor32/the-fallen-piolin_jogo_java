@@ -1,48 +1,50 @@
 package org.example;
 
+import com.almasb.fxgl.core.math.FXGLMath;
 import com.almasb.fxgl.dsl.FXGL;
-import com.almasb.fxgl.entity.Entity;
 import com.almasb.fxgl.entity.component.Component;
-import javafx.geometry.Rectangle2D;
 import javafx.util.Duration;
-
-import java.util.Optional;
-import java.util.Timer;
-import java.util.TimerTask;
-
-import java.util.Random;
-import java.util.function.Predicate;
 
 import static com.almasb.fxgl.dsl.FXGLForKtKt.getGameWorld;
 
+/*
+    Sensor do inimigo: a cada intervalo verifica se o JOGADOR está ao alcance
+    e, em caso positivo, decide aleatoriamente se dispara.
 
+    Antes este componente procurava a "entidade mais próxima" com o predicado (e) -> true,
+    ou seja, qualquer coisa: uma plataforma logo abaixo do inimigo contava como alvo.
+    O resultado era o Espalha Lixo mirando no cenário. Agora o alvo é sempre o jogador.
+*/
 public class SensorComponent extends Component {
+
+    /*
+        Alcance de ataque em unidades do mundo.
+
+        Com zoom 2.5 e janela de 1050px, a área visível tem cerca de 420 unidades de
+        largura, então este valor faz o inimigo reagir quando o jogador está em tela.
+        É o número a ajustar caso o combate fique fácil ou difícil demais.
+    */
+    private static final double DISTANCIA_DE_ATAQUE = 400;
+
+    private static final Duration INTERVALO_DE_VERIFICACAO = Duration.millis(600);
 
     private boolean emEspera = false;
 
-     @Override
+    @Override
     public void onUpdate(double tpf) {
-
-        if (!emEspera) {
-            emEspera = true;
-
-            FXGL.getGameTimer().runOnceAfter(() -> emEspera = false, Duration.millis(600));
-
-            Entity enemy = getGameWorld().getSingleton(EntityType.ENEMY);
-
-            Optional<Entity> entidadeMaisProxima = getGameWorld().getClosestEntity(enemy, (e) -> {
-                return true;
-            });
-
-            if (getEntity().distance(entidadeMaisProxima.get()) < 100){
-
-                Random random = new Random();
-                boolean decisaoAleatoriaDeTiro = random.nextBoolean();
-
-                if (decisaoAleatoriaDeTiro) {
-                    getEntity().getComponent(EnemyComponent.class).atirar(entidadeMaisProxima.get());
-                }
-            }
+        if (emEspera) {
+            return;
         }
+
+        emEspera = true;
+        FXGL.getGameTimer().runOnceAfter(() -> emEspera = false, INTERVALO_DE_VERIFICACAO);
+
+        // getSingletonOptional evita a exceção que .get() causaria quando o jogador
+        // ainda não foi invocado (contagem regressiva) ou já saiu do mundo.
+        getGameWorld().getSingletonOptional(EntityType.JOGADOR).ifPresent(jogador -> {
+            if (getEntity().distance(jogador) < DISTANCIA_DE_ATAQUE && FXGLMath.randomBoolean()) {
+                getEntity().getComponent(EnemyComponent.class).atirar(jogador);
+            }
+        });
     }
 }

@@ -5,18 +5,22 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>org.example</groupId>
-    <artifactId>testefxgl</artifactId>
+    <artifactId>the-fallen-piolin</artifactId>
     <version>1.0-SNAPSHOT</version>
+    <name>The Fallen Piolin</name>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <source.version>17</source.version>
 
         <!-- plugins -->
-        <maven.compiler.version>3.8.1</maven.compiler.version>
-        <maven.shade.version>3.0.0</maven.shade.version>
+        <maven.compiler.version>3.13.0</maven.compiler.version>
+        <maven.jar.version>3.4.1</maven.jar.version>
+        <maven.shade.version>3.5.3</maven.shade.version>
+        <maven.surefire.version>3.2.5</maven.surefire.version>
 
         <fxgl.version>21</fxgl.version>
+        <junit.version>5.10.2</junit.version>
         <jfx.maven.plugin.version>0.0.8</jfx.maven.plugin.version>
         <gluonfx.plugin.version>1.0.11</gluonfx.plugin.version>
         <attach.version>4.0.13</attach.version>
@@ -27,7 +31,7 @@
         <dependency>
             <groupId>com.github.almasb</groupId>
             <artifactId>fxgl</artifactId>
-            <version>21</version>
+            <version>${fxgl.version}</version>
         </dependency>
 
         <dependency>
@@ -52,10 +56,10 @@
         </dependency>
 
         <dependency>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-jar-plugin</artifactId>
-            <version>3.4.1</version>
-            <type>maven-plugin</type>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <version>${junit.version}</version>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 
@@ -64,9 +68,33 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.8.1</version>
+                <version>${maven.compiler.version}</version>
                 <configuration>
                     <release>${source.version}</release>
+                </configuration>
+                <executions>
+                    <!--
+                        Os testes cobrem apenas classes puras e nao precisam do modulo.
+                        Compilar no classpath evita ter que declarar o JUnit no module-info.
+                    -->
+                    <execution>
+                        <id>default-testCompile</id>
+                        <goals>
+                            <goal>testCompile</goal>
+                        </goals>
+                        <configuration>
+                            <useModulePath>false</useModulePath>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>${maven.surefire.version}</version>
+                <configuration>
+                    <useModulePath>false</useModulePath>
                 </configuration>
             </plugin>
 
@@ -74,7 +102,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>
-                <version>3.4.1</version>
+                <version>${maven.jar.version}</version>
                 <configuration>
                     <archive>
                         <manifest>
@@ -88,7 +116,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>
-                <version>3.2.4</version>
+                <version>${maven.shade.version}</version>
                 <configuration>
                     <createDependencyReducedPom>false</createDependencyReducedPom>
                     <transformers>
@@ -118,7 +146,7 @@
                     <noManPages>true</noManPages>
                     <launcher>Start-game</launcher>
                     <jlinkImageName>game</jlinkImageName>
-                    <jlinkZipName>${project.name}-game</jlinkZipName>
+                    <jlinkZipName>${project.artifactId}-game</jlinkZipName>
                     <mainClass>${mainClassName}</mainClass>
                 </configuration>
             </plugin>
@@ -138,6 +166,7 @@
                     <resourcesList>
                         <list>.*\\.lang$</list>
                         <list>.*\\.tmx$</list>
+                        <list>.*\\.tsx$</list>
                         <list>.*\\.wav$</list>
                         <list>.*\\.mp3$</list>
                     </resourcesList>
@@ -173,8 +202,8 @@
                         <list>com.almasb.fxgl.achievement.AchievementService</list>
                         <list>com.almasb.fxgl.core.math.Vec2</list>
                         <list>com.almasb.fxgl.particle.Particle</list>
-                        <!-- Components -->
 
+                        <!-- Components -->
                         <list>com.almasb.fxgl.entity.components.BoundingBoxComponent</list>
                         <list>com.almasb.fxgl.entity.components.CollidableComponent</list>
                         <list>com.almasb.fxgl.entity.components.IDComponent</list>
@@ -191,10 +220,13 @@
                         <list>com.almasb.fxgl.dsl.components.OffscreenPauseComponent</list>
                         <list>com.almasb.fxgl.dsl.components.ProjectileComponent</list>
 
-                        <!--     Custom components                  -->
-                        <list>com.almasb.fxglgames.platformer.PlayerComponent</list>
-                        <list>com.almasb.fxglgames.platformer.PlatformerFactory</list>
-
+                        <!-- Componentes deste jogo -->
+                        <list>org.example.Main</list>
+                        <list>org.example.MainFactory</list>
+                        <list>org.example.PlayerComponent</list>
+                        <list>org.example.EnemyComponent</list>
+                        <list>org.example.SensorComponent</list>
+                        <list>org.example.ObjetoCombustivelComponent</list>
                     </reflectionList>
                     <target>android</target>
                     <mainClass>${mainClassName}</mainClass>

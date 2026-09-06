@@ -1,31 +1,38 @@
 package org.example;
 
-import com.almasb.fxgl.entity.Entity;
 import com.almasb.fxgl.entity.component.Component;
 import com.almasb.fxgl.particle.ParticleComponent;
-import javafx.scene.paint.Color;
-import javafx.scene.shape.Rectangle;
-import org.example.utilitarios.FimDeJogo;
+import com.almasb.fxgl.particle.ParticleEmitter;
 
-import static com.almasb.fxgl.dsl.FXGLForKtKt.*;
-
-
+/*
+    Objeto combustível espalhado pelo mapa: quando atingido pelo fogo do Espalha Lixo
+    ele pega fogo (mais partículas) e desconta vida da floresta; quando atingido pela
+    água do Piolin, o fogo se apaga e a floresta recupera vida.
+*/
 public class ObjetoCombustivelComponent extends Component {
 
-    private static FlorestaComponent florestaComponente = new FlorestaComponent();
+    private final Floresta floresta;
     private int contadorDeParticulas = 0;
 
+    public ObjetoCombustivelComponent(Floresta floresta) {
+        this.floresta = floresta;
+    }
 
     public void tomaDano() {
-        florestaComponente.tomar_dano();
-        getEntity().getComponent(ParticleComponent.class).getEmitter().setNumParticles(++contadorDeParticulas);
+        floresta.tomarDano();
+        getEmissorDeParticulas().setNumParticles(++contadorDeParticulas);
     }
 
     public void recuperarVida() {
-        // Recupera vida somente se o objeto combustível acertado estiver danificado.
-        if (getEntity().getComponent(ParticleComponent.class).getEmitter().getNumParticles() > 0) {
-            florestaComponente.recuperar_vida_da_floresta();
-            getEntity().getComponent(ParticleComponent.class).getEmitter().setNumParticles(0);
+        // Recupera vida somente se o objeto combustível acertado estiver em chamas.
+        if (getEmissorDeParticulas().getNumParticles() > 0) {
+            floresta.recuperarVida();
+            getEmissorDeParticulas().setNumParticles(0);
+            contadorDeParticulas = 0;
         }
+    }
+
+    private ParticleEmitter getEmissorDeParticulas() {
+        return getEntity().getComponent(ParticleComponent.class).getEmitter();
     }
 }

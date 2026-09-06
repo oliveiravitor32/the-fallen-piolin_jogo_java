@@ -5,192 +5,145 @@ import com.almasb.fxgl.entity.component.Component;
 import com.almasb.fxgl.physics.PhysicsComponent;
 import com.almasb.fxgl.texture.AnimatedTexture;
 import com.almasb.fxgl.texture.AnimationChannel;
-
-import com.almasb.fxgl.ui.FontType;
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.geometry.Point2D;
-import javafx.scene.control.Button;
 import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
-import javafx.scene.paint.Color;
-import javafx.scene.shape.Rectangle;
 import javafx.util.Duration;
+import org.example.ui.Hud;
 import org.example.utilitarios.FimDeJogo;
+import org.example.utilitarios.Vida;
 
-
-import static com.almasb.fxgl.dsl.FXGL.getAppWidth;
-import static com.almasb.fxgl.dsl.FXGL.getGameScene;
-import static com.almasb.fxgl.dsl.FXGLForKtKt.*;
-
+import static com.almasb.fxgl.dsl.FXGLForKtKt.image;
+import static com.almasb.fxgl.dsl.FXGLForKtKt.spawn;
 
 /*
- Componente da entidade jogador para definir o visual e as ações
- */
-
+    Componente da entidade jogador (Piolin): define o visual animado e as ações.
+*/
 public class PlayerComponent extends Component {
+
+    // Escala do personagem em tela. O sinal define para que lado ele está virado.
+    public static final double ESCALA = 0.4;
+
+    private static final int VIDA_MAXIMA = 10;
+    private static final int PULOS_DISPONIVEIS = 2;
+    private static final double VELOCIDADE = 220;
+    private static final double IMPULSO_DO_PULO = -400;
+
+    /*
+        Tempo de espera entre disparos.
+
+        É PROPOSITALMENTE COMPARTILHADO entre a pena e a água: trata-se de um limite
+        global de cadência de tiro, para que alternar entre as duas armas não permita
+        disparar duas vezes mais rápido.
+    */
+    private static final Duration ESPERA_ENTRE_DISPAROS = Duration.millis(600);
 
     // Injetando o componente de física para ser utilizado dentro da classe
     private PhysicsComponent physics;
 
-    //Injetando componentes para gerar animação ao visual (sprite) do jogador
-    private AnimatedTexture texture;
-    private AnimationChannel animIdle, animWalk, test;
+    // Injetando componentes para gerar animação ao visual (sprite) do jogador
+    private final AnimatedTexture texture;
+    private final AnimationChannel animIdle, animWalk;
 
-    private int vida = 10;
+    private final Vida vida = new Vida(VIDA_MAXIMA);
+    private final Hud hud;
 
-    //Propriedades de configurações
-    //Colocar o jogador em tempo de espera para evitar tiros simultaneos
-    private boolean shootInCooldown = false;
+    private boolean disparoEmEspera = false;
+    private int pulosRestantes = PULOS_DISPONIVEIS;
 
-    //Definindo limite de pulos do jogador
-    private int jumps = 2;
-
-    //Barra visual de vida
-    private Rectangle barra_de_vida = new Rectangle(100, 30, Color.GREEN);
-
-    // Construtor da classe
-    public PlayerComponent() {
+    public PlayerComponent(Hud hud) {
+        this.hud = hud;
 
         // Definindo o PNG com os quadros (frames) de animação
         Image image = image("walk_piolin1-Sheet.png");
 
         // Definindo animação para jogador parado
-        animIdle = new AnimationChannel(image, 1, 64, 64, Duration.seconds(1), 0, 0);
+        animIdle = new AnimationChannel(image, 4, 64, 64, Duration.seconds(1), 0, 0);
 
         // Definindo animação para jogador andando
         animWalk = new AnimationChannel(image, 4, 64, 64, Duration.seconds(1), 1, 3);
 
-        // Colocando a primeira textura do jogodor ao ser invocado
-        // animIdle = parado
+        // Colocando a primeira textura do jogador ao ser invocado (animIdle = parado)
         texture = new AnimatedTexture(animIdle);
-
-        // Loop para gerar a animação
         texture.loop();
-
-        //Imagem Barra de Vida do Piolin
-        Image imagemBarraDeVidaDiretorio = new Image("assets/textures/barra_de_vida_piolin.png");
-        ImageView imagemBarraDeVida = new ImageView(imagemBarraDeVidaDiretorio);
-        imagemBarraDeVida.setFitHeight(38);
-
-        imagemBarraDeVida.setX(getAppWidth() - 1000);
-        imagemBarraDeVida.setY(52);
-        imagemBarraDeVida.setPreserveRatio(true);
-
-        getGameScene().addUINode(imagemBarraDeVida);
-
-        //BARRA DE VIDA
-        barra_de_vida.setX(getAppWidth() - 964);
-        barra_de_vida.setY(56);
-        getGameScene().addUINode(barra_de_vida);
     }
-
 
     @Override
     public void onAdded() {
         entity.getTransformComponent().setScaleOrigin(new Point2D(25, 21));
         entity.getViewComponent().addChild(texture);
 
+        entity.setScaleX(ESCALA);
+        entity.setScaleY(ESCALA);
 
-        // Escala do personagem
-        entity.setScaleX(0.4);
-        entity.setScaleY(0.4);
+        hud.atualizarPiolin(vida.getFracao());
 
-        // Adicionando ouvinte (listener) para capturar o momento do jogador encostando no chão
-        // e recarregar os pulos
-        physics.onGroundProperty().addListener((obs, old, isOnGround) -> {
-            if (isOnGround) {
-                jumps = 2;
+        // Recarrega os pulos quando o jogador encosta no chão
+        physics.onGroundProperty().addListener((obs, antes, estaNoChao) -> {
+            if (estaNoChao) {
+                pulosRestantes = PULOS_DISPONIVEIS;
             }
         });
     }
 
-
-    // Método chamado quando ouver atualização a ser feita no personagem
+    // Alterna as animações entre parado e andando
     @Override
     public void onUpdate(double tpf) {
+        AnimationChannel desejado = physics.isMovingX() ? animWalk : animIdle;
 
-        // NECESSÁRIA ATUALIZAÇÃO NESTE BLOCO DE CÓDIGO FUTURAMENTE
-        // alternar as animações entre parado e andando
-        if (physics.isMovingX()) {
-
-            if (texture.getAnimationChannel() != animWalk) {
-                texture.loopAnimationChannel(animWalk);
-            }
-        }
-        else {
-
-            if (texture.getAnimationChannel() != animIdle) {
-                texture.loopAnimationChannel(animIdle);
-            }
+        if (texture.getAnimationChannel() != desejado) {
+            texture.loopAnimationChannel(desejado);
         }
     }
 
-    // Os métodos abaixo seram chamados quando o jogador utilizar cada atalho correspondente
-    // eles são os responsaveis por configurar as regras de cada ação
-
-    //Mover para a esquerda
     public void left() {
-        getEntity().setScaleX(-0.4);
-        physics.setVelocityX(-220);
-
+        entity.setScaleX(-ESCALA);
+        physics.setVelocityX(-VELOCIDADE);
     }
 
-    //Mover para a direita
     public void right() {
-        getEntity().setScaleX(0.4);
-        physics.setVelocityX(220);
+        entity.setScaleX(ESCALA);
+        physics.setVelocityX(VELOCIDADE);
     }
 
-    // Este método em especifico é chamado no final de cada ação de movimento para a esquerda e direita
-    // para parar o personagem depois de andar
+    // Chamado ao final de cada ação de movimento para parar o personagem
     public void stop() {
         physics.setVelocityX(0);
     }
 
-
-    // Pular com o personagem
     public void jump() {
-        if (jumps == 0)
+        if (pulosRestantes == 0) {
             return;
+        }
 
-        physics.setVelocityY(-400);
-
-        jumps--;
+        physics.setVelocityY(IMPULSO_DO_PULO);
+        pulosRestantes--;
     }
 
-    // Atirar penas com o personagem
     public void shoot() {
-
-        if(!shootInCooldown) {
-            spawn("feather");
-            FXGL.play("paper.wav");
-
-            shootInCooldown = true;
-
-            FXGL.getGameTimer().runOnceAfter(() -> shootInCooldown = false, Duration.millis(600));
-        }
+        dispararComEspera("feather", "paper.wav");
     }
 
     public void dispararAgua() {
+        dispararComEspera("disparo_de_agua", "water.wav");
+    }
 
-        if(!shootInCooldown) {
-            spawn("disparo_de_agua");
-            FXGL.play("water.wav");
-
-            shootInCooldown = true;
-
-            FXGL.getGameTimer().runOnceAfter(() -> shootInCooldown = false, Duration.millis(600));
+    private void dispararComEspera(String entidade, String som) {
+        if (disparoEmEspera) {
+            return;
         }
+
+        spawn(entidade);
+        FXGL.play(som);
+
+        disparoEmEspera = true;
+        FXGL.getGameTimer().runOnceAfter(() -> disparoEmEspera = false, ESPERA_ENTRE_DISPAROS);
     }
 
     public void tomaDano() {
-        vida--;
-        barra_de_vida.setWidth(barra_de_vida.getWidth()-10);
+        vida.tomarDano(1);
+        hud.atualizarPiolin(vida.getFracao());
 
-        if (vida <= 0 ) {
-
-            // GAME OVER!
+        if (vida.estaZerada()) {
             FimDeJogo.terminarLoser();
         }
     }
