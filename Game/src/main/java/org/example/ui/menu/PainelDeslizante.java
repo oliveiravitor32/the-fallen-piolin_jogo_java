@@ -179,6 +179,19 @@ public class PainelDeslizante extends StackPane {
         return this;
     }
 
+    /*
+        Impede que um clique fora da folha a feche.
+
+        Usado pelas telas de fim de jogo: ali a folha nao e opcional, e o motor fica
+        pausado atras dela. Se pudesse ser dispensada, o jogador ficaria preso numa
+        partida congelada sem nenhum botao na tela.
+    */
+    public PainelDeslizante semFecharAoClicarFora() {
+        fundoEscuro.setOnMouseClicked(null);
+
+        return this;
+    }
+
     /** Botao que apenas recolhe a folha, como o "Concluido" e o "Cancelar". */
     public PainelDeslizante comAcaoDeFechar(String rotulo) {
         return comAcao(rotulo, EstiloDaInterface.Tipo.VIDRO, this::fechar);

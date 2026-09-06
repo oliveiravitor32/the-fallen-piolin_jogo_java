@@ -32,6 +32,7 @@ public final class EstiloDaInterface {
     public static final String VERDE = "#3FD44B";
     public static final String VERDE_REALCE = "#5CEE68";
     public static final String VERMELHO = "#FF4B4B";
+    public static final String AZUL_AGUA = "#4FC3F7";
 
     // Materiais
     public static final String VIDRO = "rgba(255,255,255,0.14)";

@@ -32,7 +32,7 @@ public class Floresta {
         hud.atualizarFloresta(vida.getFracao());
 
         if (vida.estaZerada()) {
-            FimDeJogo.terminarLoser();
+            FimDeJogo.terminarLoserPorFloresta();
         }
     }
 

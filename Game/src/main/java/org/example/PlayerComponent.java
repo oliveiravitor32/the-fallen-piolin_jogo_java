@@ -144,7 +144,7 @@ public class PlayerComponent extends Component {
         hud.atualizarPiolin(vida.getFracao());
 
         if (vida.estaZerada()) {
-            FimDeJogo.terminarLoser();
+            FimDeJogo.terminarLoserPorPiolin();
         }
     }
 }
