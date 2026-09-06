@@ -11,7 +11,7 @@ import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 
 /*
-    Estilo do menu: a ARRUMACAO vem do iOS, a APARENCIA vem do pixel art.
+    Estilo da interface: a ARRUMACAO vem do iOS, a APARENCIA vem do pixel art.
 
     O nome nao cita o iOS de proposito: dele vem so o arranjo dos elementos, nunca
     as cores, a fonte ou o acabamento, que seguem a arte do jogo.
@@ -23,9 +23,10 @@ import javafx.scene.text.Text;
     Do pixel art vem tudo o que e visual: a fonte Pixelify Sans, cantos quase retos,
     bordas grossas e sombras duras (sem esfumado), para combinar com os sprites do jogo.
 
-    Todos os valores estao aqui em um lugar so: mexer nesta classe muda o menu inteiro.
+    Todos os valores estao aqui em um lugar so: mexer nesta classe muda a interface
+    inteira -- os dois menus, as folhas e a tela de carregamento.
 */
-public final class EstiloDoMenu {
+public final class EstiloDaInterface {
 
     // Paleta: cores saturadas, no espirito de uma paleta de pixel art
     public static final String VERDE = "#3FD44B";
@@ -57,7 +58,7 @@ public final class EstiloDoMenu {
     private static FontFactory fabricaRegular;
     private static FontFactory fabricaNegrito;
 
-    private EstiloDoMenu() {
+    private EstiloDaInterface() {
         // Classe utilitaria: nao deve ser instanciada.
     }
 
@@ -107,9 +108,9 @@ public final class EstiloDoMenu {
         /** Acao principal: preenchido com a cor de destaque. */
         PRIMARIO(VERDE, VERDE_REALCE, "#101018", "#101018"),
         /** Acao secundaria: material translucido sobre o fundo. */
-        VIDRO(EstiloDoMenu.VIDRO, VIDRO_REALCE, "white", BORDA_VIDRO),
+        VIDRO(EstiloDaInterface.VIDRO, VIDRO_REALCE, "white", BORDA_VIDRO),
         /** Acao destrutiva: texto vermelho sobre vidro. */
-        DESTRUTIVO(EstiloDoMenu.VIDRO, VIDRO_REALCE, VERMELHO, BORDA_VIDRO);
+        DESTRUTIVO(EstiloDaInterface.VIDRO, VIDRO_REALCE, VERMELHO, BORDA_VIDRO);
 
         private final String fundo;
         private final String fundoRealce;

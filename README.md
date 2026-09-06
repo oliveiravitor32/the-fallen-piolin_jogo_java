@@ -37,10 +37,23 @@ As fontes da própria engine (`setFontUI`, `setFontGame`, `setFontText`, `setFon
 em `Main.initSettings`) também apontam para a Pixelify Sans, então qualquer tela que o
 FXGL desenhe por conta própria continua com a fonte pixelada.
 
-O estilo fica todo em `ui/menu/EstiloDoMenu.java` — cores, cantos, espessuras e fontes
-estão centralizados ali, então dá para mudar a aparência dos dois menus editando um
-arquivo só. O tamanho dos blocos do papel de parede é a constante `TAMANHO_DO_BLOCO`
-em `ui/menu/MenuPrincipal.java`.
+## Tela de carregamento
+
+Aparece entre o menu e a partida, com o Piolin pulando, "Carregando..." e uma barra
+indeterminada. Ela é rápida — costuma durar menos de um quarto de segundo.
+
+O Piolin **pula em vez de girar**, como fazia antes: rotacionar um sprite obriga o
+JavaFX a interpolar as cores e desmancha a grade de pixels, enquanto um deslocamento
+vertical preserva cada pixel intacto. Pelo mesmo motivo o sprite é ampliado por um
+fator inteiro (2×), para cada pixel da arte virar um quadrado exato.
+
+## Onde mexer no visual
+
+O estilo fica todo em `ui/menu/EstiloDaInterface.java` — cores, cantos, espessuras e
+fontes estão centralizados ali, então dá para mudar a aparência de toda a interface
+(os dois menus, as folhas e o carregamento) editando um arquivo só. O tamanho dos
+blocos do papel de parede é a constante `TAMANHO_DO_BLOCO` em
+`ui/menu/MenuPrincipal.java`.
 
 ## Como jogar
 
@@ -110,7 +123,7 @@ Game/
     ui/menu/MenuComEstilo.java      Base comum aos dois menus
     ui/menu/MenuPrincipal.java      Tela de início (menu principal)
     ui/menu/MenuDePausa.java        Menu de pausa (ESC ou P)
-    ui/menu/EstiloDoMenu.java       Cores, fontes e botões dos menus
+    ui/menu/EstiloDaInterface.java  Cores, fontes e botões de toda a interface
     ui/menu/PainelDeslizante.java   Folha inferior: listas e confirmações
     ui/menu/PaineisDoMenu.java      Conteúdo das folhas, usado pelos dois menus
     utilitarios/Vida.java           Regra de vida pura (testável)

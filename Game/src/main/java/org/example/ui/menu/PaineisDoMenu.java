@@ -50,7 +50,7 @@ public final class PaineisDoMenu {
         }
 
         return painel
-                .comAcao("Sair", EstiloDoMenu.Tipo.DESTRUTIVO, aoConfirmar)
+                .comAcao("Sair", EstiloDaInterface.Tipo.DESTRUTIVO, aoConfirmar)
                 .comAcaoDeFechar("Cancelar");
     }
 
@@ -62,7 +62,7 @@ public final class PaineisDoMenu {
 
         return painel
                 .comMensagem("O progresso da partida atual será perdido.")
-                .comAcao("Voltar ao menu", EstiloDoMenu.Tipo.DESTRUTIVO, aoConfirmar)
+                .comAcao("Voltar ao menu", EstiloDaInterface.Tipo.DESTRUTIVO, aoConfirmar)
                 .comAcaoDeFechar("Cancelar");
     }
 }

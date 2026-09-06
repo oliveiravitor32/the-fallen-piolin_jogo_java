@@ -26,8 +26,8 @@ public abstract class MenuComEstilo extends FXGLMenu {
         super(tipo);
     }
 
-    protected Button botao(String rotulo, EstiloDoMenu.Tipo tipo, Runnable acao) {
-        return EstiloDoMenu.botao(rotulo, tipo, LARGURA_DO_BOTAO, ALTURA_DO_BOTAO, acao);
+    protected Button botao(String rotulo, EstiloDaInterface.Tipo tipo, Runnable acao) {
+        return EstiloDaInterface.botao(rotulo, tipo, LARGURA_DO_BOTAO, ALTURA_DO_BOTAO, acao);
     }
 
     /** Coloca uma folha por cima do menu e a faz subir. */

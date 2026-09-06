@@ -1,67 +1,138 @@
 package org.example;
 
-import com.almasb.fxgl.animation.Interpolators;
 import com.almasb.fxgl.app.scene.LoadingScene;
+import javafx.animation.FadeTransition;
+import javafx.animation.Interpolator;
+import javafx.animation.TranslateTransition;
+import javafx.geometry.Pos;
 import javafx.geometry.Rectangle2D;
+import javafx.scene.effect.DropShadow;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Pane;
+import javafx.scene.layout.StackPane;
+import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Text;
-import javafx.scene.layout.HBox;
 import javafx.util.Duration;
+import org.example.ui.menu.EstiloDaInterface;
 
-import static com.almasb.fxgl.dsl.FXGLForKtKt.getUIFactoryService;
-
-import static com.almasb.fxgl.dsl.FXGL.*;
+import static com.almasb.fxgl.dsl.FXGL.getAppHeight;
+import static com.almasb.fxgl.dsl.FXGL.getAppWidth;
+import static com.almasb.fxgl.dsl.FXGL.texture;
 
 /*
-     ESTA CLASSE É RESPONSÁVEL POR CRIAR A CENA DE CARREGAMENTO (LOADING) DO JOGO!
- */
+    Tela de carregamento, no mesmo estilo dos menus.
 
+    Antes era um fundo verde chapado com o texto "Loading level" e o Piolin girando.
+    A rotacao era o principal problema para o visual em pixel art: girar um sprite
+    obriga o JavaFX a interpolar as cores e desmancha a grade de pixels. Aqui ele
+    apenas sobe e desce, movimento que preserva os pixels intactos.
+*/
 public class MainLoadingScene extends LoadingScene {
 
+    private static final double LADO_DO_SPRITE = 64;
+    private static final double ESCALA_DO_SPRITE = 2;
+
+    private static final double LARGURA_DA_BARRA = 360;
+    private static final double ALTURA_DA_BARRA = 24;
+    private static final double LARGURA_DO_BLOCO = 96;
+    private static final double MARGEM_DO_BLOCO = 5;
+
     public MainLoadingScene() {
-        Rectangle bg = new Rectangle(getAppWidth(), getAppHeight(), Color.DARKGREEN);
+        Rectangle fundo = new Rectangle(getAppWidth(), getAppHeight(), Color.web("#12101C"));
 
-        Text text = getUIFactoryService().newText("Loading level", Color.BLACK, 46.0);
-        centerText(text, getAppWidth() / 2, getAppHeight() / 3  + 25);
+        VBox coluna = new VBox(26, montarSprite(), montarTexto(), montarBarra());
+        coluna.setAlignment(Pos.CENTER);
+        coluna.setPrefSize(getAppWidth(), getAppHeight());
 
-        var hbox = new HBox(5);
+        getContentRoot().getChildren().setAll(new StackPane(fundo, coluna));
+    }
 
-        // Create "." ".." "..."
+    /*
+        Primeiro quadro da folha de sprites do Piolin, ampliado por um fator inteiro
+        para que cada pixel da arte vire um quadrado exato, sem meias medidas.
+    */
+    private StackPane montarSprite() {
+        var piolin = texture("walk_piolin1-Sheet.png")
+                .subTexture(new Rectangle2D(0, 0, LADO_DO_SPRITE, LADO_DO_SPRITE));
+
+        piolin.setFitWidth(LADO_DO_SPRITE * ESCALA_DO_SPRITE);
+        piolin.setFitHeight(LADO_DO_SPRITE * ESCALA_DO_SPRITE);
+        piolin.setSmooth(false);
+
+        TranslateTransition pulo = new TranslateTransition(Duration.seconds(0.55), piolin);
+        pulo.setByY(-16);
+        pulo.setAutoReverse(true);
+        pulo.setCycleCount(TranslateTransition.INDEFINITE);
+        pulo.setInterpolator(Interpolator.EASE_BOTH);
+        pulo.play();
+
+        StackPane caixa = new StackPane(piolin);
+        caixa.setAlignment(Pos.CENTER);
+
+        return caixa;
+    }
+
+    private HBox montarTexto() {
+        Text rotulo = EstiloDaInterface.texto("Carregando", 30, true, EstiloDaInterface.TEXTO);
+        rotulo.setEffect(new DropShadow(0, 4, 4, Color.web("#000000", 0.8)));
+
+        HBox linha = new HBox(4, rotulo);
+        linha.setAlignment(Pos.CENTER);
+
+        // Os tres pontos acendem em sequencia, dando a sensacao de progresso
         for (int i = 0; i < 3; i++) {
-            var textDot = getUIFactoryService().newText(".", Color.BLACK, 46.0);
+            Text ponto = EstiloDaInterface.texto(".", 30, true, EstiloDaInterface.TEXTO);
 
-            hbox.getChildren().add(textDot);
+            FadeTransition piscada = new FadeTransition(Duration.seconds(0.5), ponto);
+            piscada.setFromValue(0.15);
+            piscada.setToValue(1);
+            piscada.setAutoReverse(true);
+            piscada.setCycleCount(FadeTransition.INDEFINITE);
+            piscada.setDelay(Duration.seconds(i * 0.25));
+            piscada.play();
 
-            animationBuilder(this)
-                    .autoReverse(true)
-                    .delay(Duration.seconds(i * 0.5))
-                    .repeatInfinitely()
-                    .fadeIn(textDot)
-                    .buildAndPlay();
+            linha.getChildren().add(ponto);
         }
 
-        hbox.setTranslateX(getAppWidth() / 2 - 20);
-        hbox.setTranslateY(getAppHeight() / 2);
+        return linha;
+    }
 
-        // Primeiro quadro (64x64) da folha de sprites do Piolin.
-        // Antes esta linha pedia "player.png", arquivo que não existe no projeto: o FXGL
-        // caía num placeholder e registrava apenas um aviso no console.
-        var playerTexture = texture("walk_piolin1-Sheet.png").subTexture(new Rectangle2D(0, 0, 64, 64));
-        playerTexture.setTranslateX(getAppWidth() / 2.0 - 32);
-        playerTexture.setTranslateY(getAppHeight() / 2.0 - 32);
+    /*
+        Barra indeterminada: um bloco solido vai e volta dentro da trilha. Nao mede
+        progresso real, so indica que o jogo esta trabalhando.
+    */
+    private StackPane montarBarra() {
+        Rectangle trilha = new Rectangle(LARGURA_DA_BARRA, ALTURA_DA_BARRA);
+        trilha.setFill(Color.web("#FFFFFF", 0.10));
+        trilha.setStroke(Color.web("#FFFFFF", 0.45));
+        trilha.setStrokeWidth(EstiloDaInterface.BORDA);
+        trilha.setArcWidth(EstiloDaInterface.RAIO);
+        trilha.setArcHeight(EstiloDaInterface.RAIO);
 
-        animationBuilder(this)
-                .duration(Duration.seconds(1.25))
-                .repeatInfinitely()
-                .autoReverse(true)
-                .interpolator(Interpolators.EXPONENTIAL.EASE_IN_OUT())
-                .rotate(playerTexture)
-                .from(0)
-                .to(360)
-                .buildAndPlay();
+        Rectangle bloco = new Rectangle(LARGURA_DO_BLOCO, ALTURA_DA_BARRA - MARGEM_DO_BLOCO * 2);
+        bloco.setFill(Color.web(EstiloDaInterface.VERDE));
+        bloco.setTranslateX(MARGEM_DO_BLOCO);
+        bloco.setTranslateY(MARGEM_DO_BLOCO);
 
-        getContentRoot().getChildren().setAll(bg, text, hbox, playerTexture);
+        double percurso = LARGURA_DA_BARRA - LARGURA_DO_BLOCO - MARGEM_DO_BLOCO * 2;
 
+        TranslateTransition vaievem = new TranslateTransition(Duration.seconds(1.1), bloco);
+        vaievem.setFromX(MARGEM_DO_BLOCO);
+        vaievem.setToX(MARGEM_DO_BLOCO + percurso);
+        vaievem.setAutoReverse(true);
+        vaievem.setCycleCount(TranslateTransition.INDEFINITE);
+        vaievem.setInterpolator(Interpolator.EASE_BOTH);
+        vaievem.play();
+
+        Pane barra = new Pane(trilha, bloco);
+        barra.setPrefSize(LARGURA_DA_BARRA, ALTURA_DA_BARRA);
+        barra.setMaxSize(LARGURA_DA_BARRA, ALTURA_DA_BARRA);
+
+        StackPane caixa = new StackPane(barra);
+        caixa.setAlignment(Pos.CENTER);
+
+        return caixa;
     }
 }

@@ -103,22 +103,22 @@ public class MenuPrincipal extends MenuComEstilo {
     }
 
     private StackPane montarConteudo() {
-        Text titulo = EstiloDoMenu.texto("The Fallen Piolin", 52, true, EstiloDoMenu.TEXTO);
+        Text titulo = EstiloDaInterface.texto("The Fallen Piolin", 52, true, EstiloDaInterface.TEXTO);
         // Sombra dura, deslocada em pixels inteiros: nada de esfumado
         titulo.setEffect(new DropShadow(0, 5, 5, Color.web("#0B0A12", 0.85)));
 
-        Text subtitulo = EstiloDoMenu.texto("Defenda a floresta do Espalha Lixo",
-                16, false, EstiloDoMenu.TEXTO_SECUNDARIO);
+        Text subtitulo = EstiloDaInterface.texto("Defenda a floresta do Espalha Lixo",
+                16, false, EstiloDaInterface.TEXTO_SECUNDARIO);
 
         VBox cabecalho = new VBox(6, titulo, subtitulo);
         cabecalho.setAlignment(Pos.CENTER);
         cabecalho.setPadding(new Insets(0, 0, 38, 0));
 
         VBox botoes = new VBox(ESPACO_ENTRE_BOTOES,
-                botao("Jogar", EstiloDoMenu.Tipo.PRIMARIO, this::fireNewGame),
-                botao("Controles", EstiloDoMenu.Tipo.VIDRO, this::abrirControles),
-                botao("Créditos", EstiloDoMenu.Tipo.VIDRO, this::abrirCreditos),
-                botao("Sair", EstiloDoMenu.Tipo.DESTRUTIVO, () -> confirmarSaida(null)));
+                botao("Jogar", EstiloDaInterface.Tipo.PRIMARIO, this::fireNewGame),
+                botao("Controles", EstiloDaInterface.Tipo.VIDRO, this::abrirControles),
+                botao("Créditos", EstiloDaInterface.Tipo.VIDRO, this::abrirCreditos),
+                botao("Sair", EstiloDaInterface.Tipo.DESTRUTIVO, () -> confirmarSaida(null)));
         botoes.setAlignment(Pos.CENTER);
 
         VBox coluna = new VBox(cabecalho, botoes);

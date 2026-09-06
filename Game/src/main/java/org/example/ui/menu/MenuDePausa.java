@@ -38,7 +38,7 @@ public class MenuDePausa extends MenuComEstilo {
     }
 
     private StackPane montarConteudo() {
-        Text titulo = EstiloDoMenu.texto("Pausa", 44, true, EstiloDoMenu.TEXTO);
+        Text titulo = EstiloDaInterface.texto("Pausa", 44, true, EstiloDaInterface.TEXTO);
         titulo.setEffect(new DropShadow(0, 5, 5, Color.web("#0B0A12", 0.85)));
 
         VBox cabecalho = new VBox(titulo);
@@ -46,11 +46,11 @@ public class MenuDePausa extends MenuComEstilo {
         cabecalho.setPadding(new Insets(0, 0, 34, 0));
 
         VBox botoes = new VBox(ESPACO_ENTRE_BOTOES,
-                botao("Continuar", EstiloDoMenu.Tipo.PRIMARIO, this::fireResume),
-                botao("Controles", EstiloDoMenu.Tipo.VIDRO, this::abrirControles),
-                botao("Reiniciar", EstiloDoMenu.Tipo.VIDRO, this::fireNewGame),
-                botao("Menu principal", EstiloDoMenu.Tipo.VIDRO, this::confirmarVoltarAoMenu),
-                botao("Sair", EstiloDoMenu.Tipo.DESTRUTIVO,
+                botao("Continuar", EstiloDaInterface.Tipo.PRIMARIO, this::fireResume),
+                botao("Controles", EstiloDaInterface.Tipo.VIDRO, this::abrirControles),
+                botao("Reiniciar", EstiloDaInterface.Tipo.VIDRO, this::fireNewGame),
+                botao("Menu principal", EstiloDaInterface.Tipo.VIDRO, this::confirmarVoltarAoMenu),
+                botao("Sair", EstiloDaInterface.Tipo.DESTRUTIVO,
                         () -> confirmarSaida("O progresso da partida atual será perdido.")));
         botoes.setAlignment(Pos.CENTER);
 
