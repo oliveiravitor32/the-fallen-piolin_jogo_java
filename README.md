@@ -7,7 +7,11 @@ Piolin enfrenta o **Espalha Lixo** enquanto tenta manter a floresta de pé: o in
 incendeia os objetos combustíveis espalhados pelo mapa, e cada objeto em chamas
 consome a vida da floresta.
 
+![Partida em andamento](docs/screenshots/gameplay.png)
+
 ## Tela de início
+
+![Menu principal](docs/screenshots/menu-principal.png)
 
 Ao abrir, o jogo mostra um menu principal que junta duas referências: **a arrumação
 vem do iOS e a aparência vem do pixel art**.
@@ -22,7 +26,13 @@ grossas e sombras duras. O papel de parede é a própria arte da floresta reduzi
 blocos (o desfoque seria o oposto de pixel art) e escurecida para os botões ficarem
 legíveis.
 
+| Controles | Créditos |
+|---|---|
+| ![Folha de controles](docs/screenshots/controles.png) | ![Folha de créditos](docs/screenshots/creditos.png) |
+
 ## Menu de pausa
+
+![Menu de pausa](docs/screenshots/menu-pausa.png)
 
 `ESC` ou `P` durante a partida abrem o menu de pausa, no mesmo estilo da tela de
 início: **Continuar**, **Controles**, **Reiniciar**, **Menu principal** e **Sair**. Em
@@ -33,6 +43,8 @@ As confirmações de sair do jogo e de voltar ao menu também são nossas — o 
 padrão do FXGL usava as cores e o acabamento da engine. Por isso as telas chamam
 `PaineisDoMenu.confirmarSaida(...)` em vez de `fireExit()`.
 
+![Confirmação de saída](docs/screenshots/confirmar-saida.png)
+
 As fontes da própria engine (`setFontUI`, `setFontGame`, `setFontText`, `setFontMono`
 em `Main.initSettings`) também apontam para a Pixelify Sans, então qualquer tela que o
 FXGL desenhe por conta própria continua com a fonte pixelada.
@@ -40,7 +52,10 @@ FXGL desenhe por conta própria continua com a fonte pixelada.
 ## Tela de carregamento
 
 Aparece entre o menu e a partida, com o Piolin pulando, "Carregando..." e uma barra
-indeterminada. Ela é rápida — costuma durar menos de um quarto de segundo.
+indeterminada. Ela é rápida — costuma durar menos de um quarto de segundo. A tela de
+inicialização do FXGL, mostrada ao abrir o jogo, usa exatamente o mesmo visual.
+
+![Tela de carregamento](docs/screenshots/carregamento.png)
 
 O Piolin **pula em vez de girar**, como fazia antes: rotacionar um sprite obriga o
 JavaFX a interpolar as cores e desmancha a grade de pixels, enquanto um deslocamento
@@ -69,6 +84,16 @@ blocos do papel de parede é a constante `TAMANHO_DO_BLOCO` em
 A pena machuca o inimigo; a água apaga o fogo dos objetos combustíveis e devolve
 vida à floresta. Há um tempo de espera de 600 ms entre disparos, compartilhado
 pelas duas armas.
+
+## Fim de partida
+
+O desfecho ocupa o centro da tela, com a mesma arrumação dos menus. A derrota informa
+o motivo — o Piolin caiu ou a floresta queimou —, já que as duas causas levam à mesma
+tela.
+
+| Vitória | Derrota |
+|---|---|
+| ![Tela de vitória](docs/screenshots/vitoria.png) | ![Tela de derrota](docs/screenshots/derrota.png) |
 
 ## O Espalha Lixo
 
