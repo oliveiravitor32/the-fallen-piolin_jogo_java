@@ -35,6 +35,14 @@ public class EnemyComponent extends Component {
     private static final double VELOCIDADE_DO_PROJETIL = 300;
 
     /*
+        Pulo igual ao do Piolin (mesmo impulso, pulo duplo). Antes o Espalha Lixo nao
+        pulava: ficava preso ao andar em que nasceu, e todo combustivel ou jogador
+        num degrau acima era inalcancavel.
+    */
+    private static final double IMPULSO_DO_PULO = -400;
+    private static final int PULOS_DISPONIVEIS = 2;
+
+    /*
         Tempo de vida do disparo. Junto com a velocidade, define o alcance real:
         300 x 1,2s = 360 unidades.
     */
@@ -75,6 +83,7 @@ public class EnemyComponent extends Component {
     private boolean tiroEmEspera = false;
     private boolean preparandoTiro = false;
     private boolean furioso = false;
+    private int pulosRestantes = PULOS_DISPONIVEIS;
 
     public EnemyComponent(Hud hud) {
         this.hud = hud;
@@ -100,6 +109,12 @@ public class EnemyComponent extends Component {
         entity.setScaleY(ESCALA);
 
         hud.atualizarEspalhaLixo(vida.getFracao());
+
+        physics.onGroundProperty().addListener((obs, antes, estaNoChao) -> {
+            if (estaNoChao) {
+                pulosRestantes = PULOS_DISPONIVEIS;
+            }
+        });
     }
 
     // ------------------------------------------------------------------ movimento
@@ -130,6 +145,21 @@ public class EnemyComponent extends Component {
         texture.loopAnimationChannel(furioso ? animWalkFurioso : animWalk);
         getEntity().setScaleX(sentido * ESCALA);
         physics.setVelocityX(sentido * velocidade());
+    }
+
+    /** Pula, se ainda restar pulo. Devolve se o pulo aconteceu. */
+    public boolean pular() {
+        if (preparandoTiro || pulosRestantes == 0) {
+            return false;
+        }
+
+        physics.setVelocityY(IMPULSO_DO_PULO);
+        pulosRestantes--;
+        return true;
+    }
+
+    public boolean estaNoChao() {
+        return physics.isOnGround();
     }
 
     /** Para no lugar e volta a animacao de parado. */

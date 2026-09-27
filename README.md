@@ -97,15 +97,19 @@ tela.
 
 ## O Espalha Lixo
 
-Ele tem uma intenção: **atear fogo**. Caminha até o objeto combustível mais próximo
-que ainda não está queimando, chega perto e o incendeia. Só larga esse plano quando o
-Piolin se aproxima, e por pouco tempo — depois volta a circular pelo mapa.
+A luta tem dois objetivos que competem: derrotar o Espalha Lixo e manter a floresta
+viva. A IA dele é uma **IA de utilidade** — a cada meio segundo cada ação recebe uma
+nota conforme a situação, e a maior vence. É ela que cria o dilema: ir atrás dele e
+deixar a floresta queimar, ou apagar o fogo e virar alvo.
 
-| Estado | Quando | O que faz |
+| Ação | Nota alta quando | O que faz |
 |---|---|---|
-| `INCENDIANDO` | Padrão | Vai até o combustível apagado mais próximo e ateia fogo |
-| `DEFENDENDO` | Piolin por perto | Mantém distância dele e atira, por no máximo 2,5s |
-| `CACANDO` | Nada apagado ao alcance | Persegue o Piolin |
+| `INCENDIAR` | Há combustível perto e o Piolin está longe | Vai até ele (pulando entre andares) e ateia fogo |
+| `ENFRENTAR` | O Piolin está perto; cai depois de ~4s de briga | Circula em volta dele, pula para desviar e atira |
+| `PERSEGUIR` | Não sobrou nada apagado | Vai atrás do Piolin |
+
+Ele nunca fica parado por muito tempo: em combate troca de posição a cada segundo,
+pula quando empaca numa parede e desiste de um combustível que não consegue alcançar.
 
 Abaixo de 1/3 de vida ele **se enfurece**: anda mais rápido, atira com menos espera e
 a animação de caminhada acelera, para a mudança ficar visível.
