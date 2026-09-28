@@ -51,8 +51,12 @@ public class EnemyComponent extends Component {
     /*
         Espera entre disparos. Atirar no jogador e mais rapido do que atear fogo:
         o incendio precisa dar tempo de o Piolin cruzar o mapa e apagar as chamas.
+
+        A espera conta a partir do momento em que o projetil SAI, nao de quando o
+        preparo comeca -- antes os 260 ms de preparo eram descontados da espera e,
+        com a furia, sobravam menos de meio segundo entre tiros.
     */
-    private static final Duration ESPERA_CONTRA_JOGADOR = Duration.millis(700);
+    private static final Duration ESPERA_CONTRA_JOGADOR = Duration.millis(1300);
     private static final Duration ESPERA_CONTRA_OBJETO = Duration.millis(2200);
 
     /*
@@ -80,7 +84,12 @@ public class EnemyComponent extends Component {
     private final Vida vida = new Vida(VIDA_MAXIMA);
     private final Hud hud;
 
-    private boolean tiroEmEspera = false;
+    /*
+        Instante (relogio do jogo, em segundos) a partir do qual pode atirar de novo.
+        Antes era um booleano liberado por um timer; um marco de tempo nao depende de
+        nenhum timer disparar na hora certa.
+    */
+    private double podeAtirarAPartirDe = 0;
     private boolean preparandoTiro = false;
     private boolean furioso = false;
     private int pulosRestantes = PULOS_DISPONIVEIS;
@@ -186,7 +195,7 @@ public class EnemyComponent extends Component {
     }
 
     public boolean podeAtirar() {
-        return !tiroEmEspera && !preparandoTiro;
+        return !preparandoTiro && FXGL.getGameTimer().getNow() >= podeAtirarAPartirDe;
     }
 
     /*
@@ -202,7 +211,6 @@ public class EnemyComponent extends Component {
         boolean alvoEhJogador = alvo.isType(EntityType.JOGADOR);
 
         preparandoTiro = true;
-        tiroEmEspera = true;
 
         parar();
         encarar(alvo);
@@ -220,15 +228,14 @@ public class EnemyComponent extends Component {
         FXGL.getGameTimer().runOnceAfter(() -> {
             preparandoTiro = false;
 
+            Duration espera = aplicarFuria(alvoEhJogador ? ESPERA_CONTRA_JOGADOR : ESPERA_CONTRA_OBJETO);
+            podeAtirarAPartirDe = FXGL.getGameTimer().getNow() + espera.toSeconds();
+
             if (entity != null && entity.isActive()) {
                 lancarProjetil(paraEsquerda);
                 texture.loopAnimationChannel(animIdle);
             }
         }, TEMPO_DE_PREPARO);
-
-        Duration espera = alvoEhJogador ? ESPERA_CONTRA_JOGADOR : ESPERA_CONTRA_OBJETO;
-
-        FXGL.getGameTimer().runOnceAfter(() -> tiroEmEspera = false, aplicarFuria(espera));
     }
 
     /*
