@@ -58,7 +58,7 @@ public class EnemyComponent extends Component {
         preparo comeca -- antes os 260 ms de preparo eram descontados da espera e,
         com a furia, sobravam menos de meio segundo entre tiros.
     */
-    private static final Duration ESPERA_CONTRA_JOGADOR = Duration.millis(1300);
+    private static final Duration ESPERA_CONTRA_JOGADOR = Duration.millis(1050);
     private static final Duration ESPERA_CONTRA_OBJETO = Duration.millis(2200);
 
     /*

@@ -57,7 +57,7 @@ public class IaDoEspalhaLixo extends Component {
         caindo ate zero. E o que o faz largar a briga e voltar a incendiar, mesmo com
         o jogador colado nele -- o dilema do jogo depende disso.
     */
-    private static final double FOLEGO_DE_COMBATE = 4.0;
+    private static final double FOLEGO_DE_COMBATE = 5.5;
 
     /** Distancias usadas para dar nota: acima delas, "longe"; abaixo, "perto". */
     private static final double DISTANCIA_DE_AMEACA = 320;
@@ -198,7 +198,7 @@ public class IaDoEspalhaLixo extends Component {
         double perto = 1 - limitar(getEntity().distance(jogador) / DISTANCIA_DE_AMEACA);
 
         // Com furia ele briga mais, e o folego dura o mesmo
-        double agressividade = corpo.estaFurioso() ? 1.0 : 0.8;
+        double agressividade = corpo.estaFurioso() ? 1.0 : 0.9;
 
         double folego = 1 - limitar((tempoEnfrentando - FOLEGO_DE_COMBATE) / FOLEGO_DE_COMBATE);
 

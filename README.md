@@ -105,7 +105,7 @@ deixar a floresta queimar, ou apagar o fogo e virar alvo.
 | Ação | Nota alta quando | O que faz |
 |---|---|---|
 | `INCENDIAR` | Há combustível perto e o Piolin está longe | Vai até ele (pulando entre andares) e ateia fogo |
-| `ENFRENTAR` | O Piolin está perto; cai depois de ~4s de briga | Circula em volta dele, pula para desviar e atira |
+| `ENFRENTAR` | O Piolin está perto; cai depois de ~5s de briga | Circula em volta dele, pula para desviar e atira |
 | `PERSEGUIR` | Não sobrou nada apagado | Vai atrás do Piolin |
 
 Ele nunca fica parado por muito tempo: em combate troca de posição a cada segundo,
