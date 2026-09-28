@@ -16,6 +16,7 @@ import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Text;
 import javafx.util.Duration;
 
+import static com.almasb.fxgl.dsl.FXGLForKtKt.getSettings;
 import static com.almasb.fxgl.dsl.FXGLForKtKt.texture;
 
 /*
@@ -125,7 +126,13 @@ public class MenuPrincipal extends MenuComEstilo {
         VBox coluna = new VBox(cabecalho, botoes);
         coluna.setAlignment(Pos.CENTER);
 
-        StackPane conteudo = new StackPane(coluna);
+        // Versao discreta no canto, lida das configuracoes do FXGL (Main.initSettings)
+        Text versao = EstiloDaInterface.texto("v" + getSettings().getVersion(),
+                13, false, EstiloDaInterface.TEXTO_SECUNDARIO);
+        StackPane.setAlignment(versao, Pos.BOTTOM_RIGHT);
+        StackPane.setMargin(versao, new Insets(0, 16, 12, 0));
+
+        StackPane conteudo = new StackPane(coluna, versao);
         conteudo.setPrefSize(getAppWidth(), getAppHeight());
 
         animarSubida(cabecalho, Duration.ZERO);

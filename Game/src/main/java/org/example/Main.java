@@ -61,7 +61,7 @@ public class Main extends GameApplication {
     */
     @Override
     protected void initSettings(GameSettings settings) {
-        settings.setVersion("1.0.0");
+        settings.setVersion("2.0");
         settings.setTitle("The Fallen Piolin");
 
         // Icone da barra de titulo e da barra de tarefas
