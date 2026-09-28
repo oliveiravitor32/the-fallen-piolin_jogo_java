@@ -17,7 +17,14 @@ public class Floresta {
 
     private static final int VIDA_MAXIMA = 30;
     private static final int DANO_POR_ACERTO = 3;
-    private static final int CURA_POR_ACERTO = 5;
+
+    /*
+        Cura ao apagar um objeto, por disparo de fogo que ele levou. Fica abaixo do
+        dano de proposito: antes apagar devolvia 5 de uma vez, mais do que os 3 que o
+        disparo tirou, e o jogador ganhava vida so por apagar. Agora cada acerto do
+        Espalha Lixo deixa uma perda permanente de 1, e apagar so reduz o prejuizo.
+    */
+    private static final int CURA_POR_ACERTO_APAGADO = 2;
 
     private final Vida vida = new Vida(VIDA_MAXIMA);
     private final Hud hud;
@@ -36,8 +43,9 @@ public class Floresta {
         }
     }
 
-    public void recuperarVida() {
-        vida.curar(CURA_POR_ACERTO);
+    /** Cura proporcional a quantos disparos de fogo o objeto apagado tinha levado. */
+    public void recuperarVida(int acertosApagados) {
+        vida.curar(CURA_POR_ACERTO_APAGADO * acertosApagados);
         hud.atualizarFloresta(vida.getFracao());
     }
 }

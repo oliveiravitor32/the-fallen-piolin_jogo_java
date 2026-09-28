@@ -31,7 +31,7 @@ public class ObjetoCombustivelComponent extends Component {
     public void recuperarVida() {
         // Recupera vida somente se o objeto combustível acertado estiver em chamas.
         if (estaEmChamas()) {
-            floresta.recuperarVida();
+            floresta.recuperarVida(contadorDeParticulas);
             getEmissorDeParticulas().setNumParticles(0);
             contadorDeParticulas = 0;
         }
