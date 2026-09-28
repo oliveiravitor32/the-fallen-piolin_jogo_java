@@ -70,6 +70,17 @@ fontes estão centralizados ali, então dá para mudar a aparência de toda a in
 blocos do papel de parede é a constante `TAMANHO_DO_BLOCO` em
 `ui/menu/MenuPrincipal.java`.
 
+## Ajustes
+
+O botão **Ajustes** do menu principal muda o balanceamento sem tocar no código —
+útil para apresentar o jogo a quem nunca jogou. Há três predefinições (**Fácil**,
+**Normal**, **Difícil**) e cada valor pode ser ajustado com `−` e `+`: vida do
+Piolin, do Espalha Lixo e da floresta, dano do fogo, cura da água, espera entre os
+tiros, velocidade do inimigo e quanto tempo ele briga antes de voltar a queimar.
+
+As mudanças valem a partir da próxima partida e ficam salvas entre execuções. Os
+valores e limites estão em `Ajustes.java`.
+
 ## Como jogar
 
 | Barra | Significado |

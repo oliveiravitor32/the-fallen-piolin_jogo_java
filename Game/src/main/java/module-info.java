@@ -6,6 +6,7 @@
 */
 open module thefallenpiolin.main {
     requires com.almasb.fxgl.all;
+    requires java.prefs;
     requires com.almasb.fxgl.core;
     requires com.almasb.fxgl.scene;
 }

@@ -31,9 +31,7 @@ import static org.example.EntityType.DISPARO_INIMIGO_CONTRA_JOGADOR;
 public class EnemyComponent extends Component {
 
     private static final double ESCALA = 0.8;
-    private static final int VIDA_MAXIMA = 30;
 
-    private static final double VELOCIDADE = 180;
     private static final double VELOCIDADE_DO_PROJETIL = 300;
 
     /*
@@ -58,8 +56,10 @@ public class EnemyComponent extends Component {
         preparo comeca -- antes os 260 ms de preparo eram descontados da espera e,
         com a furia, sobravam menos de meio segundo entre tiros.
     */
-    private static final Duration ESPERA_CONTRA_JOGADOR = Duration.millis(1050);
-    private static final Duration ESPERA_CONTRA_OBJETO = Duration.millis(2200);
+    // Os valores vem do menu Ajustes, lidos quando o inimigo nasce
+    private final double velocidadeBase = Ajustes.VELOCIDADE_DO_ESPALHA_LIXO.get();
+    private final Duration esperaContraJogador = Duration.seconds(Ajustes.ESPERA_CONTRA_PIOLIN.get());
+    private final Duration esperaContraObjeto = Duration.seconds(Ajustes.ESPERA_CONTRA_FLORESTA.get());
 
     /*
         Preparo antes de o projetil sair: o inimigo trava no lugar e toca a animacao
@@ -83,7 +83,7 @@ public class EnemyComponent extends Component {
     private final AnimatedTexture texture;
     private final AnimationChannel animIdle, animWalk, animWalkFurioso, animTiro;
 
-    private final Vida vida = new Vida(VIDA_MAXIMA);
+    private final Vida vida = new Vida(Ajustes.VIDA_DO_ESPALHA_LIXO.getInt());
     private final Hud hud;
 
     /*
@@ -230,7 +230,7 @@ public class EnemyComponent extends Component {
         FXGL.getGameTimer().runOnceAfter(() -> {
             preparandoTiro = false;
 
-            Duration espera = aplicarFuria(alvoEhJogador ? ESPERA_CONTRA_JOGADOR : ESPERA_CONTRA_OBJETO);
+            Duration espera = aplicarFuria(alvoEhJogador ? esperaContraJogador : esperaContraObjeto);
             podeAtirarAPartirDe = FXGL.getGameTimer().getNow() + espera.toSeconds();
 
             if (entity != null && entity.isActive()) {
@@ -326,7 +326,7 @@ public class EnemyComponent extends Component {
     }
 
     private double velocidade() {
-        return furioso ? VELOCIDADE * MULTIPLICADOR_DE_VELOCIDADE_FURIOSO : VELOCIDADE;
+        return furioso ? velocidadeBase * MULTIPLICADOR_DE_VELOCIDADE_FURIOSO : velocidadeBase;
     }
 
     private Duration aplicarFuria(Duration espera) {

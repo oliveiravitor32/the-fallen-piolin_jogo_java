@@ -117,6 +117,7 @@ public class MenuPrincipal extends MenuComEstilo {
         VBox botoes = new VBox(ESPACO_ENTRE_BOTOES,
                 botao("Jogar", EstiloDaInterface.Tipo.PRIMARIO, this::fireNewGame),
                 botao("Controles", EstiloDaInterface.Tipo.VIDRO, this::abrirControles),
+                botao("Ajustes", EstiloDaInterface.Tipo.VIDRO, this::abrirAjustes),
                 botao("Créditos", EstiloDaInterface.Tipo.VIDRO, this::abrirCreditos),
                 botao("Sair", EstiloDaInterface.Tipo.DESTRUTIVO, () -> confirmarSaida(null)));
         botoes.setAlignment(Pos.CENTER);
@@ -131,6 +132,10 @@ public class MenuPrincipal extends MenuComEstilo {
         animarSubida(botoes, Duration.millis(90));
 
         return conteudo;
+    }
+
+    private void abrirAjustes() {
+        abrirPainel(PainelDeAjustes.criar(getAppWidth(), getAppHeight()));
     }
 
     private void abrirCreditos() {

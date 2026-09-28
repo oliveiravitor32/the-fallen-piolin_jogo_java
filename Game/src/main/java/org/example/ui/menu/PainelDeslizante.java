@@ -184,6 +184,15 @@ public class PainelDeslizante extends StackPane {
         return comAcao(rotulo, EstiloDaInterface.Tipo.VIDRO, this::fechar);
     }
 
+    /** Conteudo livre, para folhas que precisam de controles proprios (Ajustes). */
+    public PainelDeslizante comConteudo(Node conteudo) {
+        return inserirAntesDasAcoes(conteudo);
+    }
+
+    public static double larguraInterna() {
+        return LARGURA_INTERNA;
+    }
+
     private PainelDeslizante inserirAntesDasAcoes(Node conteudo) {
         folha.getChildren().add(folha.getChildren().indexOf(acoes), conteudo);
 

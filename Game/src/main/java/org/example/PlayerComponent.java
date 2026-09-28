@@ -23,7 +23,6 @@ public class PlayerComponent extends Component {
     // Escala do personagem em tela. O sinal define para que lado ele está virado.
     public static final double ESCALA = 0.4;
 
-    private static final int VIDA_MAXIMA = 10;
     private static final int PULOS_DISPONIVEIS = 2;
     private static final double VELOCIDADE = 220;
     private static final double IMPULSO_DO_PULO = -400;
@@ -44,7 +43,7 @@ public class PlayerComponent extends Component {
     private final AnimatedTexture texture;
     private final AnimationChannel animIdle, animWalk;
 
-    private final Vida vida = new Vida(VIDA_MAXIMA);
+    private final Vida vida = new Vida(Ajustes.VIDA_DO_PIOLIN.getInt());
     private final Hud hud;
 
     private boolean disparoEmEspera = false;
