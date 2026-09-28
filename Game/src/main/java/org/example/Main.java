@@ -375,6 +375,16 @@ public class Main extends GameApplication {
             jogador.getComponent(PlayerComponent.class).tomaDano();
         });
 
+        /*
+            O disparo contra o Piolin atravessa os objetos combustiveis: so tem
+            colisao registrada com o jogador. Antes havia um tiro so, e as arvores no
+            caminho o engoliam -- quase nenhum ataque chegava ao Piolin.
+        */
+        onCollisionBegin(EntityType.DISPARO_INIMIGO_CONTRA_JOGADOR, EntityType.JOGADOR, (tiro, jogador) -> {
+            tiro.removeFromWorld();
+            jogador.getComponent(PlayerComponent.class).tomaDano();
+        });
+
         onCollisionBegin(EntityType.DISPARO_INIMIGO, EntityType.OBJETO_COMBUSTIVEL, (tiro, objetoCombustivel) -> {
             tiro.removeFromWorld();
             objetoCombustivel.getComponent(ObjetoCombustivelComponent.class).tomaDano();

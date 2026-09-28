@@ -9,6 +9,7 @@ import com.almasb.fxgl.physics.PhysicsComponent;
 import com.almasb.fxgl.texture.AnimatedTexture;
 import com.almasb.fxgl.texture.AnimationChannel;
 import javafx.geometry.Point2D;
+import javafx.scene.effect.ColorAdjust;
 import javafx.scene.image.Image;
 import javafx.util.Duration;
 import org.example.ui.Hud;
@@ -18,6 +19,7 @@ import org.example.utilitarios.Vida;
 import static com.almasb.fxgl.dsl.FXGLForKtKt.entityBuilder;
 import static com.almasb.fxgl.dsl.FXGLForKtKt.image;
 import static org.example.EntityType.DISPARO_INIMIGO;
+import static org.example.EntityType.DISPARO_INIMIGO_CONTRA_JOGADOR;
 
 /*
     CORPO do inimigo (Espalha Lixo): visual, movimento, disparo e vida.
@@ -232,7 +234,7 @@ public class EnemyComponent extends Component {
             podeAtirarAPartirDe = FXGL.getGameTimer().getNow() + espera.toSeconds();
 
             if (entity != null && entity.isActive()) {
-                lancarProjetil(paraEsquerda);
+                lancarProjetil(paraEsquerda, alvoEhJogador);
                 texture.loopAnimationChannel(animIdle);
             }
         }, TEMPO_DE_PREPARO);
@@ -247,7 +249,13 @@ public class EnemyComponent extends Component {
         o fogo so contava quando os dois estavam na mesma tela. O que limita o alcance
         aqui e o tempo de vida, como ja acontece com os disparos do jogador.
     */
-    private void lancarProjetil(boolean paraEsquerda) {
+    /*
+        Sao dois projeteis. O de fogo (DISPARO_INIMIGO) incendeia combustiveis e
+        tambem fere o Piolin. O contra o jogador (DISPARO_INIMIGO_CONTRA_JOGADOR)
+        atravessa arvores e caixas e so acerta o Piolin; tem outra cor para o jogador
+        saber que aquele tiro nao vai queimar a floresta.
+    */
+    private void lancarProjetil(boolean paraEsquerda, boolean contraJogador) {
         double origemY = getEntity().getCenter().getY() - 28;
         double origemX = getEntity().getCenter().getX() - (paraEsquerda ? 40 : 0);
 
@@ -257,10 +265,17 @@ public class EnemyComponent extends Component {
         AnimationChannel animacaoDoTiro =
                 new AnimationChannel(image("tiro_de_fogo.png"), 4, 32, 32, Duration.seconds(0.1), 0, 3);
 
+        AnimatedTexture visual = new AnimatedTexture(animacaoDoTiro);
+
+        if (contraJogador) {
+            // Desloca o matiz do fogo para um roxo/verde de "lixo toxico"
+            visual.setEffect(new ColorAdjust(0.75, 0.2, 0, 0));
+        }
+
         Entity projetil = entityBuilder()
                 .at(origemX, origemY)
-                .type(DISPARO_INIMIGO)
-                .viewWithBBox(new AnimatedTexture(animacaoDoTiro))
+                .type(contraJogador ? DISPARO_INIMIGO_CONTRA_JOGADOR : DISPARO_INIMIGO)
+                .viewWithBBox(visual)
                 .collidable()
                 .with(new ProjectileComponent(direcao, VELOCIDADE_DO_PROJETIL))
                 .scale(ESCALA, paraEsquerda ? -ESCALA : ESCALA)
