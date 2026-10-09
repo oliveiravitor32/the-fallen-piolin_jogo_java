@@ -217,3 +217,14 @@ A fonte do menu é a **Pixelify Sans**, © 2021 The Pixelify Sans Project Author
 ([repositório](https://github.com/eifetx/Pixelify-Sans)), distribuída sob a
 [SIL Open Font License 1.1](Game/src/main/resources/assets/ui/fonts/OFL.txt). O texto
 completo da licença acompanha os arquivos em `assets/ui/fonts/`.
+
+## Equipe
+
+Projeto desenvolvido por:
+
+| Integrante | GitHub |
+|---|---|
+| Bruno Bonavigo Dacal | [@Bonavigo](https://github.com/Bonavigo) |
+| Guilherme Leandro | [@Guiswer](https://github.com/Guiswer) |
+| Helen Silva | [@helen-silv4](https://github.com/helen-silv4) |
+| Vitor Oliveira | [@oliveiravitor32](https://github.com/oliveiravitor32) |
