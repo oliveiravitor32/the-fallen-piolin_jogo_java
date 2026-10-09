@@ -222,9 +222,33 @@ completo da licença acompanha os arquivos em `assets/ui/fonts/`.
 
 Projeto desenvolvido por:
 
-| Integrante | GitHub |
-|---|---|
-| Bruno Bonavigo Dacal | [@Bonavigo](https://github.com/Bonavigo) |
-| Guilherme Leandro | [@Guiswer](https://github.com/Guiswer) |
-| Helen Silva | [@helen-silv4](https://github.com/helen-silv4) |
-| Vitor Oliveira | [@oliveiravitor32](https://github.com/oliveiravitor32) |
+<!-- As fotos vem direto do GitHub (github.com/<usuario>.png), entao acompanham
+     qualquer troca de foto de perfil sem precisar editar este arquivo. -->
+<table>
+  <tr>
+    <td align="center">
+      <a href="https://github.com/Bonavigo">
+        <img src="https://github.com/Bonavigo.png?size=120" width="100" alt="Bruno Bonavigo Dacal"><br>
+        <sub><b>Bruno Bonavigo Dacal</b></sub>
+      </a>
+    </td>
+    <td align="center">
+      <a href="https://github.com/Guiswer">
+        <img src="https://github.com/Guiswer.png?size=120" width="100" alt="Guilherme Leandro"><br>
+        <sub><b>Guilherme Leandro</b></sub>
+      </a>
+    </td>
+    <td align="center">
+      <a href="https://github.com/helen-silv4">
+        <img src="https://github.com/helen-silv4.png?size=120" width="100" alt="Helen Silva"><br>
+        <sub><b>Helen Silva</b></sub>
+      </a>
+    </td>
+    <td align="center">
+      <a href="https://github.com/oliveiravitor32">
+        <img src="https://github.com/oliveiravitor32.png?size=120" width="100" alt="Vitor Oliveira"><br>
+        <sub><b>Vitor Oliveira</b></sub>
+      </a>
+    </td>
+  </tr>
+</table>
